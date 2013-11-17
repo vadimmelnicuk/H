@@ -77,6 +77,12 @@ void AX_RX_Status(void)
 	}
 }
 
+void AX_GOTO(unsigned char ID, unsigned short int Angle, unsigned short int Speed, unsigned short int Torque)
+{
+	AX_TX_Instruction(ID, AX_WRITE, AX_WRITE_GOAL_POSITION_HOME);
+	AX_RX_Status();
+}
+
 struct AX_PARAMS AX_READ_PARAMS(unsigned char ID)
 {
 	struct AX_PARAMS Servo;
