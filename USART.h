@@ -30,5 +30,4 @@ void RX1_Clear_Buffer(void);
 unsigned char TX1_Buffer[50];
 unsigned char RX1_Buffer[10];
 
-
 #endif	//USART_H

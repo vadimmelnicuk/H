@@ -17,7 +17,6 @@ void AX_RX_Status(void);
 void AX_GOTO(unsigned char, unsigned short int, unsigned short int, unsigned short int);
 struct AX_PARAMS AX_READ_PARAMS(unsigned char);
 
-
 //Structures
 struct AX_PARAMS {
 	unsigned char ID;
