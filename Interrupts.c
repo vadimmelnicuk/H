@@ -1,9 +1,9 @@
 //--------------------------------------------------------------
-//	File:			Main.c
+//	File:			Interrupts.c
 //	Author:			Vadim Melnicuk
 //	Company:		Birmingham City University
-//	Date:			11/11/2013
-//	Description:	
+//	Date:			03/12/2013
+//	Description:
 //--------------------------------------------------------------
 
 //Header files
@@ -11,13 +11,7 @@
 
 //--------------------------------------------------------------
 
-void main(void)
+void interrupt High_interrupt(void)
 {
-	Init();
 
-	AX_INIT();
-
-	while(1){
-		
-	}
 }

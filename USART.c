@@ -47,7 +47,9 @@ unsigned char RX1_Byte(void)
 	return RX1_REG;
 }
 
-void RX1_Clear_Buffer(void)
+unsigned short int TX1_TCTI(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
 {
-	memset(&RX1_Buffer[0], 0, sizeof(RX1_Buffer));
+	unsigned short int i;
+	i = (c2 << 8) | c1;
+	return i;
 }

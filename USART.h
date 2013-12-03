@@ -13,7 +13,7 @@
 void USART1_Mode(unsigned char);
 void TX1_Byte(unsigned char);
 unsigned char RX1_Byte(void);
-void RX1_Clear_Buffer(void);
+unsigned short int TX1_TCTI(unsigned char, unsigned char);
 
 //Defines
 #define TX1_EN TXSTA1bits.TXEN

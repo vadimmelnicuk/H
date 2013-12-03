@@ -13,8 +13,18 @@
 
 void AX_INIT(void)
 {
-	const struct AX_PARAMS F1R_D = {1,7,250,0,1023,70,60,140,1023,2,0};
-	const struct AX_PARAMS F2R_D = {2,7,250,0,1023,70,60,140,1023,2,0};
+	F1R = AX_READ_PARAMS(F1R_D.ID);
+	while(1){
+		AX_Go_To(F1R_D.ID, F1R_D.CW_LIMIT, 200);
+		AX_Go_To(F2R_D.ID, F2R_D.CCW_LIMIT, 200);
+		
+		while(AX_Is_Moving(F1R_D.ID));
+
+		AX_Go_To(F1R_D.ID, F1R_D.CCW_LIMIT, 200);
+		AX_Go_To(F2R_D.ID, F2R_D.CW_LIMIT, 200);
+		
+		while(AX_Is_Moving(F1R_D.ID));
+	}
 }
 
 void AX_PING(unsigned char ID)
@@ -30,8 +40,6 @@ void AX_PING(unsigned char ID)
 	TX1_Byte(2);
 	TX1_Byte(1);
 	TX1_Byte(Checksum);
-
-	RX1_Clear_Buffer();
 
 	while(!TX1_STATUS);
 }
@@ -58,8 +66,6 @@ void AX_TX_Instruction(unsigned char ID, const unsigned char Instruction, unsign
 	}
 	TX1_Byte(Checksum);
 
-	RX1_Clear_Buffer();
-
 	while(!TX1_STATUS);
 }
 
@@ -77,10 +83,21 @@ void AX_RX_Status(void)
 	}
 }
 
-void AX_GOTO(unsigned char ID, unsigned short int Angle, unsigned short int Speed, unsigned short int Torque)
+void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int Speed)
 {
-	AX_TX_Instruction(ID, AX_WRITE, AX_WRITE_GOAL_POSITION_HOME);
+	AX_WRITE_GOAL_POSITION[2] = Position & 0xFF;	//Position Low byte
+	AX_WRITE_GOAL_POSITION[3] = Position >> 8;	//Position High Byte
+	AX_WRITE_GOAL_POSITION[4] = Speed & 0xFF;	//Speed Low Byte
+	AX_WRITE_GOAL_POSITION[5] = Speed >> 8;		//Speed High Byte
+	AX_TX_Instruction(ID, AX_WRITE, AX_WRITE_GOAL_POSITION);
 	AX_RX_Status();
+}
+
+unsigned char AX_Is_Moving(unsigned char ID)
+{
+	AX_TX_Instruction(ID, AX_READ, AX_READ_MOVING);
+	AX_RX_Status();
+	return RX1_Buffer[5];
 }
 
 struct AX_PARAMS AX_READ_PARAMS(unsigned char ID)
@@ -96,10 +113,10 @@ struct AX_PARAMS AX_READ_PARAMS(unsigned char ID)
 	Servo.DELAY_TIME = RX1_Buffer[5];
 	AX_TX_Instruction(ID, AX_READ, AX_READ_CW_LIMIT);
 	AX_RX_Status();
-	Servo.CW_LIMIT = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.CW_LIMIT = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_CCW_LIMIT);
 	AX_RX_Status();
-	Servo.CCW_LIMIT = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.CCW_LIMIT = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_HIGHEST_LIMIT_TEMPERATURE);
 	AX_RX_Status();
 	Servo.HIGHEST_LIMIT_TEMPERATURE = RX1_Buffer[5];
@@ -111,19 +128,19 @@ struct AX_PARAMS AX_READ_PARAMS(unsigned char ID)
 	Servo.HIGHEST_LIMIT_VOLTAGE = RX1_Buffer[5];
 	AX_TX_Instruction(ID, AX_READ, AX_READ_MAX_TORQUE);
 	AX_RX_Status();
-	Servo.MAX_TORQUE = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.MAX_TORQUE = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_STATUS_RETURN_LEVEL);
 	AX_RX_Status();
 	Servo.STATUS_RETURN_LEVEL = RX1_Buffer[5];
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_POSITION);
 	AX_RX_Status();
-	Servo.PRESENT_POSITION = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.PRESENT_POSITION = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_SPEED);
 	AX_RX_Status();
-	Servo.PRESENT_SPEED = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.PRESENT_SPEED = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_LOAD);
 	AX_RX_Status();
-	Servo.PRESENT_LOAD = ((RX1_Buffer[6] << 8) | RX1_Buffer[5]);
+	Servo.PRESENT_LOAD = TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_VOLTAGE);
 	AX_RX_Status();
 	Servo.PRESENT_VOLTAGE = RX1_Buffer[5];

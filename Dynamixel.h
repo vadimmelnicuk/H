@@ -14,7 +14,8 @@ void AX_INIT(void);
 void AX_PING(unsigned char);
 void AX_TX_Instruction(unsigned char, const unsigned char , unsigned char *);
 void AX_RX_Status(void);
-void AX_GOTO(unsigned char, unsigned short int, unsigned short int, unsigned short int);
+void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
+unsigned char AX_Is_Moving(unsigned char);
 struct AX_PARAMS AX_READ_PARAMS(unsigned char);
 
 //Structures
@@ -51,6 +52,7 @@ struct AX_DEFAULTS {
 	unsigned short int MAX_TORQUE;
 	unsigned char STATUS_RETURN_LEVEL;
 	unsigned char LOCK;
+	unsigned short int HOME_POSITION;
 };
 typedef struct AX_DEFAULTS AX_DEFAULTS;
 
@@ -117,13 +119,14 @@ const AX_DEFAULTS F1R_D = {	//Set it to "const" in order to store in program mem
 	1023,	//MAX_TORQUE
 	2,		//STATUS_RETURN_LEVEL
 	0,		//LOCK
+	512,	//HOME POSITION
 };
 
 const AX_DEFAULTS F2R_D = {
 	2,		//ID
 	7,		//BAUD_RATE (250Kbps)
 	250,	//DELAY_TYME (250us)
-	0,		//CW_LIMIT
+	490,	//CW_LIMIT
 	1023,	//CCW_LIMIT
 	70,		//HIGHEST_LIMIT_TEMPERATURE
 	60,		//LOWEST_LIMIT_VOLTAGE
@@ -131,6 +134,7 @@ const AX_DEFAULTS F2R_D = {
 	1023,	//MAX_TORQUE
 	2,		//STATUS_RETURN_LEVEL
 	0,		//LOCK
+	512,	//HOME POSITION
 };
 
 #endif	//DYNAMIXEL_H

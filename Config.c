@@ -42,9 +42,9 @@ void Init(void)
 	IPR1bits.RC1IP = 1;
 
 	//UART
-	BAUDCON1bits.BRG16 = 0;
+	BAUDCON1bits.BRG16 = 1;
 	BAUDCON1bits.CKTXP = 0;
-	SPBRG1 = ((_XTAL_FREQ/16)/AX_BAUD_RATE)-1;
+	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE)-1;
 
 	TXSTA1bits.BRGH = 1;
 	TXSTA1bits.SYNC = 0;
@@ -54,9 +54,4 @@ void Init(void)
 	RCSTA1bits.CREN = 0;
 	RCSTA1bits.RX9 = 0;
 	RCSTA1bits.SPEN = 1;
-}
-
-void interrupt High_interrupt(void)
-{
-	
 }
