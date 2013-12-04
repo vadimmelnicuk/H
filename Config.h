@@ -30,4 +30,4 @@ void Init(void);
 //Global variables
 
 
-#endif	//CONFIG_H
+#endif	//CONFIG_HP

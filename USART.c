@@ -51,5 +51,6 @@ unsigned short int TX1_TCTI(unsigned char c1, unsigned char c2)	//Two char (low 
 {
 	unsigned short int i;
 	i = (c2 << 8) | c1;
+
 	return i;
 }

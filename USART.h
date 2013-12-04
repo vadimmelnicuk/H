@@ -29,5 +29,6 @@ unsigned short int TX1_TCTI(unsigned char, unsigned char);
 //Global variables
 unsigned char TX1_Buffer[50];
 unsigned char RX1_Buffer[10];
+unsigned char RX1_Error = 0;
 
 #endif	//USART_H

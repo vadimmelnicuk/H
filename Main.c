@@ -14,9 +14,14 @@
 void main(void)
 {
 	Init();
-
-	AX_INIT();
-
+	
+	#ifdef MODE_DEV
+		AX_Init();
+	#endif
+	#ifdef MODE_FLASH
+		AX_Flash();
+	#endif
+	
 	while(1){
 		
 	}
