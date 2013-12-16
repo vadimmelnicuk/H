@@ -13,6 +13,7 @@
 void AX_Init(void);
 void AX_Ping(unsigned char);
 void AX_TX_Instruction(unsigned char, const unsigned char , unsigned char *);
+void AX_TX_Instruction_With_Status(unsigned char, const unsigned char , unsigned char *);
 void AX_RX_Status(void);
 void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
 unsigned char AX_Is_Moving(unsigned char);

@@ -26,6 +26,7 @@ void AX_Init(void)
 
 	while(1){
 		AX_Test();
+
 	}
 }
 
@@ -71,20 +72,32 @@ void AX_TX_Instruction(unsigned char ID, const unsigned char Instruction, unsign
 	while(!TX1_STATUS);
 }
 
+void AX_TX_Instruction_With_Status(unsigned char ID, const unsigned char Instruction, unsigned char *Parameters)
+{
+	AX_TX_Instruction(ID, Instruction, Parameters);
+	AX_RX_Status();
+
+	while(RX1_Error){	//Error check, if true send instruction again.
+		AX_TX_Instruction(ID, Instruction, Parameters);
+		AX_RX_Status();
+	}
+}
+
 void AX_RX_Status(void)
 {
 	unsigned char i, Length = 4;
-
 	USART1_Mode(1);
-
 	for(i=0; i<Length; i++){
 		RX1_Buffer[i] = RX1_Byte();
 		if(i == 3){
 			Length += RX1_Buffer[3];
 		}
-	}
-	if(RX1_Buffer[4]){
-		RX1_Error = 1;
+		if(i == 4 && (RX1_Buffer[4] > 0 || RX1_Buffer[3] > 5)){
+			RX1_Error = 1;
+			break;
+		}else{
+			RX1_Error = 0;
+		}
 	}
 }
 
@@ -99,8 +112,7 @@ void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int 
 
 unsigned char AX_Is_Moving(unsigned char ID)
 {
-	AX_TX_Instruction(ID, AX_READ, AX_READ_MOVING);
-	AX_RX_Status();
+	AX_TX_Instruction_With_Status(ID, AX_READ, AX_READ_MOVING);
 	return RX1_Buffer[5];
 }
 
@@ -217,50 +229,43 @@ void AX_Flash(void)
 
 void AX_Test(void)
 {
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.HOME_POSITION, 300);
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.HOME_POSITION, 300);
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.HOME_POSITION, 300);
+		unsigned short int Speed = 200;
 
+		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.HOME_POSITION, Speed);
+		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.HOME_POSITION, Speed);
+		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.HOME_POSITION, Speed);
 
 		while(AX_Is_Moving(AX_F1R_D.ID)){
-				__delay_ms(1);
-			};
-		__delay_ms(10);
+			__delay_ms(1);
+		};
 
-
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CCW_LIMIT, 200);
+		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CCW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F3R_D.ID)){
-				__delay_ms(1);
-			};
-		__delay_ms(10);
+			__delay_ms(1);
+		};
 
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CW_LIMIT, 200);
+		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F3R_D.ID)){
-				__delay_ms(1);
-			};
-		__delay_ms(10);
+			__delay_ms(1);
+		};
 
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CCW_LIMIT, 200);
+		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CCW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F2R_D.ID)){
 			__delay_ms(1);
 		};
-		__delay_ms(10);
 
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CW_LIMIT, 200);
+		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F2R_D.ID)){
 			__delay_ms(1);
 		};
-		__delay_ms(10);
 
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CW_LIMIT, 200);
+		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F1R_D.ID)){
 			__delay_ms(1);
 		};
-		__delay_ms(10);
 
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CCW_LIMIT, 200);
+		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CCW_LIMIT, Speed);
 		while(AX_Is_Moving(AX_F1R_D.ID)){
 			__delay_ms(1);
 		};
-		__delay_ms(10);
 }
