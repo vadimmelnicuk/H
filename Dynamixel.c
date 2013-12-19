@@ -13,6 +13,8 @@
 
 void AX_Init(void)
 {
+	Reach(100, 50, 100);
+
 	AX_M1R = AX_Read_Params(AX_M1R_D.ID);
 	AX_M2R = AX_Read_Params(AX_M2R_D.ID);
 	AX_M3R = AX_Read_Params(AX_M3R_D.ID);
@@ -267,16 +269,23 @@ void AX_Test(void)
 	};
 }
 
-void Reach(struct POINT_3D Target)
+void Reach(signed short int X, signed short int Y, signed short int Z)
 {
-	signed float Target_Distance_XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, C, D;
-	//Count Coxa angle and convert to AX resolution
-	Coxa_Angle = atan(Target.Y/(Target.X - COXA_LENGTH))/0.29;
+	signed short int XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, B, C, D;
+	//Calcualte Coxa angle
+	A = X - COXA_LENGTH;
+	Coxa_Angle = atan(Y/(X - COXA_LENGTH));
 	//Calculate distance from Femur to Target in XZ Plane
-	Target_Distance_XZ = sqrt(pow(Target.X - COXA_LENGTH, 2) + pow(Target.Z, 2));
-	C = acos((pow(TIBIA_LENGTH, 2) + pow(FEMUR_LENGTH, 2) - pow(Target_Distance_XZ, 2)) / (2 * TIBIA_LENGTH * FEMUR_LENGTH));
-	D = atan(Target.Z / (Target.X - COXA_LENGTH));
-	A = asin(FEMUR_LENGTH / (Target_Distance_XZ/sin(C)));
-	Femur_Angle = 90 - (A + D);
-	
+	XZ = (signed short int)sqrt(pow(X - COXA_LENGTH, 2) + pow(Z, 2));
+	C = (signed short int)acos((pow(TIBIA_LENGTH, 2) + pow(FEMUR_LENGTH, 2) - pow(XZ, 2)) / (2 * TIBIA_LENGTH * FEMUR_LENGTH));
+	D = (signed short int)atan(Z / (X - COXA_LENGTH));
+	A = (signed short int)asin(FEMUR_LENGTH / (XZ/sin(C)));
+	//Calculate Femur angle
+	Femur_Angle = (90 - (A + D));
+	if(Femur_Angle > 0){
+		B = X - (FEMUR_LENGTH * (signed short int)cos(90 - Femur_Angle));
+	}else{
+		B = X + (FEMUR_LENGTH * (signed short int)cos(90 + Femur_Angle));
+	}
+	Tibia_Angle = (signed short int)acos(B / TIBIA_LENGTH);
 }

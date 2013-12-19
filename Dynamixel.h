@@ -9,6 +9,28 @@
 #ifndef DYNAMIXEL_H
 #define	DYNAMIXEL_H
 
+//Function prototypes
+void AX_Init(void);
+void AX_Init_Legs(void);
+void AX_Ping(unsigned char);
+void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
+void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
+void AX_RX_Status(void);
+void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
+unsigned char AX_Is_Moving(unsigned char);
+unsigned short int AX_Read_Present_Position(unsigned char);
+unsigned short int AX_Read_Goal_Position(unsigned char);
+unsigned short int AX_Read_Present_Speed(unsigned char);
+unsigned short int AX_Read_Present_Load(unsigned char);
+unsigned char AX_Read_Present_Voltage(unsigned char);
+unsigned char AX_Read_Present_Temperature(unsigned char);
+unsigned char AX_Read_Moving(unsigned char);
+unsigned char AX_Read_Lock(unsigned char);
+struct AX_PARAMS AX_Read_Params(unsigned char);
+void AX_Flash(void);
+void AX_Test(void);
+void Reach(signed short int, signed short int, signed short int);
+
 //Structures
 struct POINT_2D {
 	signed short int X;
@@ -22,11 +44,6 @@ struct POINT_3D {
 	signed short int Z;
 };
 typedef struct POINT_3D POINT_3D;
-
-struct LEG {
-	POINT_2D CENTER_SHIFT;
-};
-typedef struct LEG LEG;
 
 struct AX_PARAMS {
 	unsigned char ID;
@@ -81,28 +98,6 @@ All 6 Legs will ne initialised seperatly without holding them in one global stru
 representing whole Hexapod.
 */
 
-//Function prototypes
-void AX_Init(void);
-void AX_Init_Legs(void);
-void AX_Ping(unsigned char);
-void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
-void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
-void AX_RX_Status(void);
-void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
-unsigned char AX_Is_Moving(unsigned char);
-unsigned short int AX_Read_Present_Position(unsigned char);
-unsigned short int AX_Read_Goal_Position(unsigned char);
-unsigned short int AX_Read_Present_Speed(unsigned char);
-unsigned short int AX_Read_Present_Load(unsigned char);
-unsigned char AX_Read_Present_Voltage(unsigned char);
-unsigned char AX_Read_Present_Temperature(unsigned char);
-unsigned char AX_Read_Moving(unsigned char);
-unsigned char AX_Read_Lock(unsigned char);
-struct AX_PARAMS AX_Read_Params(unsigned char);
-void AX_Flash(void);
-void AX_Test(void);
-void Reach(struct POINT_2D, struct POINT_3D);
-
 //Defines
 #ifdef MODE_DEV
 	#define AX_BAUD_RATE 500000
@@ -155,12 +150,6 @@ unsigned char AX_WRITE_GOAL_POSITION[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_GOAL_POSITION_HOME[] = {5,30,0,2,0,2};
 
 //Declare structs in .h in order to make them global
-POINT_3D TARGET_POINT = {0};
-
-const LEG LEG_MR = {		//Middle Right Leg
-	{100,0}
-};
-
 AX_PARAMS AX_M1R = {0};
 AX_PARAMS AX_M2R = {0};
 AX_PARAMS AX_M3R = {0};
