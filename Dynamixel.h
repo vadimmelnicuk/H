@@ -9,27 +9,25 @@
 #ifndef DYNAMIXEL_H
 #define	DYNAMIXEL_H
 
-//Function prototypes
-void AX_Init(void);
-void AX_Ping(unsigned char);
-void AX_TX_Instruction(unsigned char, const unsigned char , unsigned char *);
-void AX_TX_Instruction_With_Status(unsigned char, const unsigned char , unsigned char *);
-void AX_RX_Status(void);
-void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
-unsigned char AX_Is_Moving(unsigned char);
-unsigned short int AX_Read_Present_Position(unsigned char);
-unsigned short int AX_Read_Goal_Position(unsigned char);
-unsigned short int AX_Read_Present_Speed(unsigned char);
-unsigned short int AX_Read_Present_Load(unsigned char);
-unsigned char AX_Read_Present_Voltage(unsigned char);
-unsigned char AX_Read_Present_Temperature(unsigned char);
-unsigned char AX_Read_Moving(unsigned char);
-unsigned char AX_Read_Lock(unsigned char);
-struct AX_PARAMS AX_Read_Params(unsigned char);
-void AX_Flash(void);
-void AX_Test(void);
-
 //Structures
+struct POINT_2D {
+	signed short int X;
+	signed short int Y;
+};
+typedef struct POINT_2D POINT_2D;
+
+struct POINT_3D {
+	signed short int X;
+	signed short int Y;
+	signed short int Z;
+};
+typedef struct POINT_3D POINT_3D;
+
+struct LEG {
+	POINT_2D CENTER_SHIFT;
+};
+typedef struct LEG LEG;
+
 struct AX_PARAMS {
 	unsigned char ID;
 	unsigned char BAUD_RATE;
@@ -77,9 +75,33 @@ struct AX_FLASH_PARAMS {
 typedef struct AX_FLASH_PARAMS AX_FLASH_PARAMS;
 
 /*
-The BANK SIZE is limit to hold a variable with the maximum size of 256 bytes
+The BANK SIZE is limited to hold a variable with the maximum size of 256 bytes
 The global struct of size of 324 bytes could not be initialised, because of that
+All 6 Legs will ne initialised seperatly without holding them in one global structure
+representing whole Hexapod.
 */
+
+//Function prototypes
+void AX_Init(void);
+void AX_Init_Legs(void);
+void AX_Ping(unsigned char);
+void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
+void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
+void AX_RX_Status(void);
+void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
+unsigned char AX_Is_Moving(unsigned char);
+unsigned short int AX_Read_Present_Position(unsigned char);
+unsigned short int AX_Read_Goal_Position(unsigned char);
+unsigned short int AX_Read_Present_Speed(unsigned char);
+unsigned short int AX_Read_Present_Load(unsigned char);
+unsigned char AX_Read_Present_Voltage(unsigned char);
+unsigned char AX_Read_Present_Temperature(unsigned char);
+unsigned char AX_Read_Moving(unsigned char);
+unsigned char AX_Read_Lock(unsigned char);
+struct AX_PARAMS AX_Read_Params(unsigned char);
+void AX_Flash(void);
+void AX_Test(void);
+void Reach(struct POINT_2D, struct POINT_3D);
 
 //Defines
 #ifdef MODE_DEV
@@ -89,7 +111,12 @@ The global struct of size of 324 bytes could not be initialised, because of that
 	#define AX_BAUD_RATE 1000000
 #endif
 
+#define COXA_LENGTH 37			//Coxa -> Femur (mm)
+#define FEMUR_LENGTH 120		//Femur -> Tibia (mm)
+#define TIBIA_LENGTH 166		//Tibia -> End of foot (mm)
+
 //Global variables
+const unsigned char AX_PING = 1;
 const unsigned char AX_READ = 2;
 unsigned char AX_READ_BAUD_RATE[] = {2,4,1};
 unsigned char AX_READ_DELAY_TIME[] = {2,5,1};
@@ -127,62 +154,69 @@ unsigned char AX_WRITE_LOCK[] = {2,47,0};
 unsigned char AX_WRITE_GOAL_POSITION[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_GOAL_POSITION_HOME[] = {5,30,0,2,0,2};
 
-AX_PARAMS AX_F1R = {0};	//Declare structs in .h to make them global
-AX_PARAMS AX_F2R = {0};
-AX_PARAMS AX_F3R = {0};
+//Declare structs in .h in order to make them global
+POINT_3D TARGET_POINT = {0};
+
+const LEG LEG_MR = {		//Middle Right Leg
+	{100,0}
+};
+
+AX_PARAMS AX_M1R = {0};
+AX_PARAMS AX_M2R = {0};
+AX_PARAMS AX_M3R = {0};
 
 /* XC8 does not support designated initializers like C99 does. Use comments instead. */
 
-const AX_DEFAULT_PARAMS AX_F1R_D = {	//Set it to "const" in order to store in program memory
-	1,		//ID
-	3,		//BAUD_RATE - 500Kbps
-	250,	//DELAY_TYME - 250us
-	207,	//CW_LIMIT - 60
-	827,	//CCW_LIMIT - 240
-	70,		//HIGHEST_LIMIT_TEMPERATURE
-	60,		//LOWEST_LIMIT_VOLTAGE
-	140,	//HIGHEST_LIMIT_VOLTAGE
-	1023,	//MAX_TORQUE
-	1,		//STATUS_RETURN_LEVEL
-	0,		//LOCK
-	512,	//HOME POSITION
+const AX_DEFAULT_PARAMS AX_M1R_D = {	//Set it to "const" in order to store in program memory
+	1,			//ID
+	3,			//BAUD_RATE - 500Kbps
+	250,		//DELAY_TYME - 250us
+	207,		//CW_LIMIT - 60 Degrees
+	827,		//CCW_LIMIT - 240 Degrees
+	70,			//HIGHEST_LIMIT_TEMPERATURE
+	60,			//LOWEST_LIMIT_VOLTAGE
+	140,		//HIGHEST_LIMIT_VOLTAGE
+	1023,		//MAX_TORQUE
+	1,			//STATUS_RETURN_LEVEL
+	0,			//LOCK
+	512,		//HOME POSITION
 };
 
-const AX_DEFAULT_PARAMS AX_F2R_D = {
-	2,		//ID
-	3,		//BAUD_RATE - 500Kbps
-	250,	//DELAY_TYME - 250us
-	483,	//CW_LIMIT - 140
-	1023,	//CCW_LIMIT - 300
-	70,		//HIGHEST_LIMIT_TEMPERATURE
-	60,		//LOWEST_LIMIT_VOLTAGE
-	140,	//HIGHEST_LIMIT_VOLTAGE
-	1023,	//MAX_TORQUE
-	1,		//STATUS_RETURN_LEVEL
-	0,		//LOCK
-	483,	//HOME POSITION
+const AX_DEFAULT_PARAMS AX_M2R_D = {
+	2,			//ID
+	3,			//BAUD_RATE - 500Kbps
+	250,		//DELAY_TYME - 250us
+	483,		//CW_LIMIT - 140 Degrees
+	1023,		//CCW_LIMIT - 300 Degrees
+	70,			//HIGHEST_LIMIT_TEMPERATURE
+	60,			//LOWEST_LIMIT_VOLTAGE
+	140,		//HIGHEST_LIMIT_VOLTAGE
+	1023,		//MAX_TORQUE
+	1,			//STATUS_RETURN_LEVEL
+	0,			//LOCK
+	483,		//HOME POSITION
 };
 
-const AX_DEFAULT_PARAMS AX_F3R_D = {
-	3,		//ID
-	3,		//BAUD_RATE - 500Kbps
-	250,	//DELAY_TYME - 250us
-	310,	//CW_LIMIT - 90
-	690,	//CCW_LIMIT - 200
-	70,		//HIGHEST_LIMIT_TEMPERATURE
-	60,		//LOWEST_LIMIT_VOLTAGE
-	140,	//HIGHEST_LIMIT_VOLTAGE
-	1023,	//MAX_TORQUE
-	1,		//STATUS_RETURN_LEVEL
-	0,		//LOCK
-	310,	//HOME POSITION
+const AX_DEFAULT_PARAMS AX_M3R_D = {
+	3,			//ID
+	3,			//BAUD_RATE - 500Kbps
+	250,		//DELAY_TYME - 250us
+	310,		//CW_LIMIT - 90 Degrees
+	690,		//CCW_LIMIT - 200 Degrees
+	70,			//HIGHEST_LIMIT_TEMPERATURE
+	60,			//LOWEST_LIMIT_VOLTAGE
+	140,		//HIGHEST_LIMIT_VOLTAGE
+	1023,		//MAX_TORQUE
+	1,			//STATUS_RETURN_LEVEL
+	0,			//LOCK
+	310,		//HOME POSITION
 };
 
 const AX_FLASH_PARAMS AX_FLASH_D = {	//Struct to hold default target flashing setting
-	3,		//ID
-	3,		//BAUD_RATE - 500Kbps
-	250,	//DELAY_TYME - 250us
-	1,		//STATUS_RETURN_LEVEL
+	3,			//ID
+	3,			//BAUD_RATE - 500Kbps
+	250,		//DELAY_TYME - 250us
+	1,			//STATUS_RETURN_LEVEL
 };
 
 #endif	//DYNAMIXEL_H

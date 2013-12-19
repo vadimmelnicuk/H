@@ -14,23 +14,20 @@
 void Init(void)
 {
 	//FOSC
-	OSCCONbits.OSTS = 1;
-	OSCCONbits.IRCF = 0b111;
+	OSCCONbits.OSTS = 1;		//External Oscillator
+	//OSCCONbits.IRCF = 0b111;
 
 	//PORTs
-	ANSELAbits.ANSA0 = 0;
-	ANSELAbits.ANSA1 = 0;
-	ANSELAbits.ANSA2 = 0;
-	ANSELCbits.ANSC6 = 0;
-	ANSELCbits.ANSC7 = 0;
+	ANCON0bits.ANSEL0 = 0;		//RA0 - Digital
+	ANCON0bits.ANSEL1 = 0;		//RA1 - Digital
 
-	TRISAbits.RA0 = 0;
-	TRISAbits.RA1 = 0;
-	TRISAbits.RA2 = 0;
-	TRISCbits.RC6 = 1;
-	TRISCbits.RC7 = 1;
+	TRISAbits.TRISA0 = 0;		//RA0 - Output
+	TRISAbits.TRISA1 = 0;		//RA1 - Output
+	TRISCbits.TRISC6 = 1;		//RC6 - Input
+	TRISCbits.TRISC7 = 1;		//RC7 - Input
 
 	PORTA = 0;
+	PORTC = 0;
 
 	//Interrupts
 	RCONbits.IPEN = 1;
@@ -44,7 +41,7 @@ void Init(void)
 	//UART
 	BAUDCON1bits.BRG16 = 1;
 	BAUDCON1bits.CKTXP = 0;
-	
+
 	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE)-1;
 
 	TXSTA1bits.BRGH = 1;

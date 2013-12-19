@@ -13,38 +13,31 @@
 
 void AX_Init(void)
 {
-	AX_F1R = AX_Read_Params(AX_F1R_D.ID);
-	AX_F2R = AX_Read_Params(AX_F2R_D.ID);
-	AX_F3R = AX_Read_Params(AX_F3R_D.ID);
+	AX_M1R = AX_Read_Params(AX_M1R_D.ID);
+	AX_M2R = AX_Read_Params(AX_M2R_D.ID);
+	AX_M3R = AX_Read_Params(AX_M3R_D.ID);
 
-	//AX_TX_Instruction(F1R_D.ID, AX_WRITE, AX_WRITE_BAUD_RATE_500K);
-	//AX_TX_Instruction(F2R_D.ID, AX_WRITE, AX_WRITE_BAUD_RATE_500K);
+	AX_Init_Legs();
 
-	//AX_WRITE_STATUS_RETURN_LEVEL[2] = 1;
-	//AX_TX_Instruction(F1R_D.ID, AX_WRITE, AX_WRITE_STATUS_RETURN_LEVEL);
-	//AX_TX_Instruction(F2R_D.ID, AX_WRITE, AX_WRITE_STATUS_RETURN_LEVEL);
+	//AX_Test();
+}
 
-	while(1){
-		AX_Test();
-
+void AX_Init_Legs(void)
+{
+	if(AX_M1R.PRESENT_POSITION != AX_M1R_D.HOME_POSITION){
+		AX_Go_To(AX_M1R_D.ID, AX_M1R_D.HOME_POSITION, 300);
+	}
+	if(AX_M2R.PRESENT_POSITION != AX_M2R_D.HOME_POSITION){
+		AX_Go_To(AX_M2R_D.ID, AX_M2R_D.HOME_POSITION, 300);
+	}
+	if(AX_M3R.PRESENT_POSITION != AX_M3R_D.HOME_POSITION){
+		AX_Go_To(AX_M3R_D.ID, AX_M3R_D.HOME_POSITION, 300);
 	}
 }
 
 void AX_Ping(unsigned char ID)
 {
-	unsigned char Checksum;
-
-	Checksum = (~(ID + 3)) & 0xFF; 
-	USART1_Mode(0);
-
-	TX1_Byte(255);
-	TX1_Byte(255);
-	TX1_Byte(ID);
-	TX1_Byte(2);
-	TX1_Byte(1);
-	TX1_Byte(Checksum);
-
-	while(!TX1_STATUS);
+	AX_TX_Instruction_With_Status(ID, AX_PING, 0);
 }
 
 void AX_TX_Instruction(unsigned char ID, const unsigned char Instruction, unsigned char *Parameters)
@@ -53,8 +46,12 @@ void AX_TX_Instruction(unsigned char ID, const unsigned char Instruction, unsign
 	unsigned int Checksum, Parameters_Checksum = 0;
 
 	Length = Parameters[0] + 2;
-	for(i=1; i<=Parameters[0]; i++){
-		Parameters_Checksum += Parameters[i];
+	if(Parameters[0]){
+		for(i=1; i<=Parameters[0]; i++){
+			Parameters_Checksum += Parameters[i];
+		}
+	}else{
+		Parameters_Checksum = 0;
 	}
 	Checksum = (~(ID + Length + Instruction + Parameters_Checksum)) & 0xFF;
 	USART1_Mode(0);
@@ -229,43 +226,57 @@ void AX_Flash(void)
 
 void AX_Test(void)
 {
-		unsigned short int Speed = 200;
+	unsigned short int Speed = 300;
 
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.HOME_POSITION, Speed);
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.HOME_POSITION, Speed);
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.HOME_POSITION, Speed);
+	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.HOME_POSITION, Speed);
+	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.HOME_POSITION, Speed);
+	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.HOME_POSITION, Speed);
 
-		while(AX_Is_Moving(AX_F1R_D.ID)){
-			__delay_ms(1);
-		};
+	while(AX_Is_Moving(AX_M1R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CCW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F3R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.CCW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M3R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F3R_D.ID, AX_F3R_D.CW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F3R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.CW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M3R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CCW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F2R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.CCW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M2R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F2R_D.ID, AX_F2R_D.CW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F2R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.CW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M2R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F1R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.CW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M1R_D.ID)){
+		__delay_ms(1);
+	};
 
-		AX_Go_To(AX_F1R_D.ID, AX_F1R_D.CCW_LIMIT, Speed);
-		while(AX_Is_Moving(AX_F1R_D.ID)){
-			__delay_ms(1);
-		};
+	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.CCW_LIMIT, Speed);
+	while(AX_Is_Moving(AX_M1R_D.ID)){
+		__delay_ms(1);
+	};
+}
+
+void Reach(struct POINT_3D Target)
+{
+	signed float Target_Distance_XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, C, D;
+	//Count Coxa angle and convert to AX resolution
+	Coxa_Angle = atan(Target.Y/(Target.X - COXA_LENGTH))/0.29;
+	//Calculate distance from Femur to Target in XZ Plane
+	Target_Distance_XZ = sqrt(pow(Target.X - COXA_LENGTH, 2) + pow(Target.Z, 2));
+	C = acos((pow(TIBIA_LENGTH, 2) + pow(FEMUR_LENGTH, 2) - pow(Target_Distance_XZ, 2)) / (2 * TIBIA_LENGTH * FEMUR_LENGTH));
+	D = atan(Target.Z / (Target.X - COXA_LENGTH));
+	A = asin(FEMUR_LENGTH / (Target_Distance_XZ/sin(C)));
+	Femur_Angle = 90 - (A + D);
+	
 }

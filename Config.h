@@ -13,21 +13,21 @@
 #include <xc.h>
 #include <stdio.h>
 #include <string.h>
-#include <math.h>
 
 #include "USART.h"
 #include "Dynamixel.h"
 
 //PIC settings
-#pragma config FOSC=HSHP, PLLCFG=OFF, LVP=OFF
+#pragma config XINST=OFF, FOSC=HS2, PLLCFG=ON, CANMX = PORTB
 
 //Function prototypes
 void Init(void);
 
 //Defines
-#define _XTAL_FREQ 20000000
+#define _XTAL_FREQ 64000000
 
 //Global variables
 
 
 #endif	//CONFIG_HP
+#include <math.h>
