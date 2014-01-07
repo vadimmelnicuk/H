@@ -33,8 +33,8 @@ void Reach(double, double, double);
 
 //Structures
 struct POINT_2D {
-	signed short int X;
-	signed short int Y;
+	double X;
+	double Y;
 };
 typedef struct POINT_2D POINT_2D;
 

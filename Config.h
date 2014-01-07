@@ -13,12 +13,13 @@
 #include <xc.h>
 #include <stdio.h>
 #include <string.h>
+#include <math.h>
 
 #include "USART.h"
 #include "Dynamixel.h"
 
 //PIC settings
-#pragma config XINST=OFF, FOSC=HS2, PLLCFG=ON, CANMX = PORTB
+#pragma config XINST=OFF, FOSC=HS2, PLLCFG=ON, CANMX=PORTB
 
 //Function prototypes
 void Init(void);
@@ -30,4 +31,3 @@ void Init(void);
 
 
 #endif	//CONFIG_HP
-#include <math.h>

@@ -13,7 +13,7 @@
 
 void AX_Init(void)
 {
-	Reach(100, 50, 100);
+	Reach(250, 0, -150);
 
 	AX_M1R = AX_Read_Params(AX_M1R_D.ID);
 	AX_M2R = AX_Read_Params(AX_M2R_D.ID);
@@ -271,20 +271,59 @@ void AX_Test(void)
 
 void Reach(double X, double Y, double Z)
 {
-	double XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, B, C, D;
-	//Calcualte Coxa angle
-	Coxa_Angle = atan(Y/X)*180.0/M_PI;
-	//Calculate distance from Femur to Target in XZ Plane
-	XZ = sqrt(pow(X-COXA_LENGTH,2)+pow(Z,2));
-	C = acos((pow(TIBIA_LENGTH,2)+pow(FEMUR_LENGTH,2)-pow(XZ,2))/(2*TIBIA_LENGTH*FEMUR_LENGTH))*180.0/M_PI;
-	D = atan(Z/(X-COXA_LENGTH));
-	A = asin(FEMUR_LENGTH/(XZ/sin(C)));
-	//Calculate Femur angle
-	Femur_Angle = 90-(A+D);
-	if(Femur_Angle > 0){
-		B = X - (FEMUR_LENGTH*cos(90-Femur_Angle));
+	double Coxa_Angle, Femur_Angle, Tibia_Angle, d, a, h, A;
+	POINT_2D TIBIA_POINT;
+	//Calcualte Coxa Polar Angle in rad
+	//The Coxa can only move in Quarter I and IV, therefore X is always positive
+	if(Y >= 0){
+		Coxa_Angle = atan(Y/X);
 	}else{
-		B = X + (FEMUR_LENGTH*cos(90+Femur_Angle));
+		//Sumation because Y is negative and produces negative atan value
+		Coxa_Angle = 2*M_PI+atan(Y/X);
 	}
-	Tibia_Angle = acos(B / TIBIA_LENGTH);
+	//Calculate the distance between the centres of the circles in Z plane
+	d = sqrt(pow(X-COXA_LENGTH,2)+pow(Z,2));
+	//Check for solutions
+	if(d != 0 && d < (FEMUR_LENGTH+TIBIA_LENGTH)){
+		if(d != (FEMUR_LENGTH+TIBIA_LENGTH)){
+			//Circles intersect at two points
+			a = (pow(FEMUR_LENGTH,2)-pow(TIBIA_LENGTH,2)+pow(d,2))/(2*d);
+			h = sqrt(pow(FEMUR_LENGTH,2)-pow(a,2));
+			TIBIA_POINT.X = (X*a/d)-(Z*h/d);
+			TIBIA_POINT.Y = (Z*a/d)+(X*h/d);
+		}else{
+			//Circles intersect at one point
+			a = FEMUR_LENGTH;
+			h = 0;
+			TIBIA_POINT.X = X*a/d;
+			TIBIA_POINT.Y = Z*a/d;
+		}
+		//Check Femur Quarter and find Femur Polar Angle in rad
+		//If X>0 and Y>0, quarter is I
+		//If X<0 and Y>0, quarter is II
+		//If X<0 and Y<0, quarter is III
+		//If X>0 and Y<0, quarter is IV
+		if(TIBIA_POINT.X > 0){
+			if(TIBIA_POINT.Y > 0){
+				//Quarter I
+				Femur_Angle = atan(TIBIA_POINT.Y/TIBIA_POINT.X);
+			}else{
+				//Quarter IV
+				//Sumation because Y is negative and produces negative atan value
+				Femur_Angle = 2*M_PI+atan(TIBIA_POINT.Y/TIBIA_POINT.X);
+			}
+		}else{
+			if(TIBIA_POINT.Y > 0){
+				//Quarter II
+				//Sumation because X is negative and produces negative atan value
+				Femur_Angle = M_PI+atan(TIBIA_POINT.Y/TIBIA_POINT.X);
+			}else{
+				//Quarter III
+				Femur_Angle = 1.5*M_PI-atan(TIBIA_POINT.Y/TIBIA_POINT.X);
+			}
+		}
+		A = h;
+	}else{
+		//Cannot Reach
+	}
 }
