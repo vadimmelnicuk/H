@@ -29,7 +29,7 @@ unsigned char AX_Read_Lock(unsigned char);
 struct AX_PARAMS AX_Read_Params(unsigned char);
 void AX_Flash(void);
 void AX_Test(void);
-void Reach(signed short int, signed short int, signed short int);
+void Reach(double, double, double);
 
 //Structures
 struct POINT_2D {
@@ -39,9 +39,9 @@ struct POINT_2D {
 typedef struct POINT_2D POINT_2D;
 
 struct POINT_3D {
-	signed short int X;
-	signed short int Y;
-	signed short int Z;
+	double X;
+	double Y;
+	double Z;
 };
 typedef struct POINT_3D POINT_3D;
 
@@ -106,9 +106,9 @@ representing whole Hexapod.
 	#define AX_BAUD_RATE 1000000
 #endif
 
-#define COXA_LENGTH 37			//Coxa -> Femur (mm)
-#define FEMUR_LENGTH 120		//Femur -> Tibia (mm)
-#define TIBIA_LENGTH 166		//Tibia -> End of foot (mm)
+#define COXA_LENGTH 37.0		//Coxa -> Femur (mm)
+#define FEMUR_LENGTH 120.0		//Femur -> Tibia (mm)
+#define TIBIA_LENGTH 166.0		//Tibia -> End of foot (mm)
 
 //Global variables
 const unsigned char AX_PING = 1;
@@ -150,6 +150,7 @@ unsigned char AX_WRITE_GOAL_POSITION[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_GOAL_POSITION_HOME[] = {5,30,0,2,0,2};
 
 //Declare structs in .h in order to make them global
+POINT_3D TARGET_POINT = {0};
 AX_PARAMS AX_M1R = {0};
 AX_PARAMS AX_M2R = {0};
 AX_PARAMS AX_M3R = {0};

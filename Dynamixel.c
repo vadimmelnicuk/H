@@ -269,23 +269,22 @@ void AX_Test(void)
 	};
 }
 
-void Reach(signed short int X, signed short int Y, signed short int Z)
+void Reach(double X, double Y, double Z)
 {
-	signed short int XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, B, C, D;
+	double XZ, Coxa_Angle, Femur_Angle, Tibia_Angle, A, B, C, D;
 	//Calcualte Coxa angle
-	A = X - COXA_LENGTH;
-	Coxa_Angle = atan(Y/(X - COXA_LENGTH));
+	Coxa_Angle = atan(Y/X)*180.0/M_PI;
 	//Calculate distance from Femur to Target in XZ Plane
-	XZ = (signed short int)sqrt(pow(X - COXA_LENGTH, 2) + pow(Z, 2));
-	C = (signed short int)acos((pow(TIBIA_LENGTH, 2) + pow(FEMUR_LENGTH, 2) - pow(XZ, 2)) / (2 * TIBIA_LENGTH * FEMUR_LENGTH));
-	D = (signed short int)atan(Z / (X - COXA_LENGTH));
-	A = (signed short int)asin(FEMUR_LENGTH / (XZ/sin(C)));
+	XZ = sqrt(pow(X-COXA_LENGTH,2)+pow(Z,2));
+	C = acos((pow(TIBIA_LENGTH,2)+pow(FEMUR_LENGTH,2)-pow(XZ,2))/(2*TIBIA_LENGTH*FEMUR_LENGTH))*180.0/M_PI;
+	D = atan(Z/(X-COXA_LENGTH));
+	A = asin(FEMUR_LENGTH/(XZ/sin(C)));
 	//Calculate Femur angle
-	Femur_Angle = (90 - (A + D));
+	Femur_Angle = 90-(A+D);
 	if(Femur_Angle > 0){
-		B = X - (FEMUR_LENGTH * (signed short int)cos(90 - Femur_Angle));
+		B = X - (FEMUR_LENGTH*cos(90-Femur_Angle));
 	}else{
-		B = X + (FEMUR_LENGTH * (signed short int)cos(90 + Femur_Angle));
+		B = X + (FEMUR_LENGTH*cos(90+Femur_Angle));
 	}
-	Tibia_Angle = (signed short int)acos(B / TIBIA_LENGTH);
+	Tibia_Angle = acos(B / TIBIA_LENGTH);
 }
