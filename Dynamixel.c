@@ -271,7 +271,7 @@ void AX_Test(void)
 
 void Reach(double X, double Y, double Z)
 {
-	double Coxa_Angle, Femur_Angle, Tibia_Angle, d, a, h, A;
+	double Coxa_Angle, Femur_Angle, Tibia_Angle, d, a, h, b, A;
 	POINT_2D TIBIA_POINT;
 	//Calcualte Coxa Polar Angle in rad
 	//The Coxa can only move in Quarter I and IV, therefore X is always positive
@@ -303,8 +303,8 @@ void Reach(double X, double Y, double Z)
 		//If X<0 and Y>0, quarter is II
 		//If X<0 and Y<0, quarter is III
 		//If X>0 and Y<0, quarter is IV
-		if(TIBIA_POINT.X > 0){
-			if(TIBIA_POINT.Y > 0){
+		if(TIBIA_POINT.X >= 0){
+			if(TIBIA_POINT.Y >= 0){
 				//Quarter I
 				Femur_Angle = atan(TIBIA_POINT.Y/TIBIA_POINT.X);
 			}else{
@@ -313,7 +313,7 @@ void Reach(double X, double Y, double Z)
 				Femur_Angle = 2*M_PI+atan(TIBIA_POINT.Y/TIBIA_POINT.X);
 			}
 		}else{
-			if(TIBIA_POINT.Y > 0){
+			if(TIBIA_POINT.Y >= 0){
 				//Quarter II
 				//Sumation because X is negative and produces negative atan value
 				Femur_Angle = M_PI+atan(TIBIA_POINT.Y/TIBIA_POINT.X);
@@ -321,6 +321,16 @@ void Reach(double X, double Y, double Z)
 				//Quarter III
 				Femur_Angle = 1.5*M_PI-atan(TIBIA_POINT.Y/TIBIA_POINT.X);
 			}
+		}
+		//Calculate Tibia angle in rad
+		//Get absolute value of b
+		b = fabs(Z-TIBIA_POINT.Y);
+		if(Z >= TIBIA_POINT.Y){
+			//Quarter I
+			Tibia_Angle = asin(b/TIBIA_LENGTH);
+		}else{
+			//Quarter IV
+			Tibia_Angle = 2*M_PI-asin(b/TIBIA_LENGTH);
 		}
 		A = h;
 	}else{
