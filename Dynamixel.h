@@ -12,11 +12,15 @@
 //Function prototypes
 void AX_Init(void);
 void AX_Init_Legs(void);
+void AX_Flash(void);
+void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
+void AX_Test(void);
+void AX_Move_Leg(unsigned char, double, double, double, unsigned short int);
+struct AX_LEG_ANGLES AX_Calculate_Leg_Angles(double, double, double);
 void AX_Ping(unsigned char);
 void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
 void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
 void AX_RX_Status(void);
-void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
 unsigned char AX_Is_Moving(unsigned char);
 unsigned short int AX_Read_Present_Position(unsigned char);
 unsigned short int AX_Read_Goal_Position(unsigned char);
@@ -27,9 +31,6 @@ unsigned char AX_Read_Present_Temperature(unsigned char);
 unsigned char AX_Read_Moving(unsigned char);
 unsigned char AX_Read_Lock(unsigned char);
 struct AX_PARAMS AX_Read_Params(unsigned char);
-void AX_Flash(void);
-void AX_Test(void);
-void Reach(double, double, double);
 
 //Structures
 struct POINT_2D {
@@ -44,6 +45,13 @@ struct POINT_3D {
 	double Z;
 };
 typedef struct POINT_3D POINT_3D;
+
+struct AX_LEG_ANGLES {
+	double Coxa;
+	double Femur;
+	double Tibia;
+};
+typedef struct AX_LEG_ANGLES AX_LEG_ANGLES;
 
 struct AX_PARAMS {
 	unsigned char ID;
@@ -106,9 +114,12 @@ representing whole Hexapod.
 	#define AX_BAUD_RATE 1000000
 #endif
 
-#define COXA_LENGTH 37.0		//Coxa -> Femur (mm)
+#define COXA_LENGTH 45.0		//Coxa -> Femur (mm)
 #define FEMUR_LENGTH 120.0		//Femur -> Tibia (mm)
 #define TIBIA_LENGTH 166.0		//Tibia -> End of foot (mm)
+#define COXA_POLAR_ANGLE 150.0	//
+#define FEMUR_POLAR_ANGLE 255.0	//Fix the Femur Polar Angle since the part is bended
+#define TIBIA_POLAR_ANGLE 225.0	//Fix the Tibia Polar Angle
 
 //Global variables
 const unsigned char AX_PING = 1;
@@ -132,6 +143,7 @@ unsigned char AX_READ_MOVING[] = {2,46,1};
 unsigned char AX_READ_LOCK[] = {2,47,1};
 
 const unsigned char AX_WRITE = 3;
+const unsigned char AX_SYNC_WRITE = 131;
 unsigned char AX_WRITE_ID[] = {2,3,1};
 unsigned char AX_WRITE_BAUD_RATE_1M[] = {2,4,1};
 unsigned char AX_WRITE_BAUD_RATE_500K[] = {2,4,3};
@@ -148,15 +160,16 @@ unsigned char AX_WRITE_TORQUE_EN[] = {2,24,1};
 unsigned char AX_WRITE_LOCK[] = {2,47,0};
 unsigned char AX_WRITE_GOAL_POSITION[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_GOAL_POSITION_HOME[] = {5,30,0,2,0,2};
+unsigned char AX_WRITE_LEG_GOAL_POSITION[] = {17,30,4,0,0,2,0,2,0,0,2,0,2,0,0,2,0,2};
 
 //Declare structs in .h in order to make them global
 POINT_3D TARGET_POINT = {0};
+AX_LEG_ANGLES LEG_ANGLES = {0};
 AX_PARAMS AX_M1R = {0};
 AX_PARAMS AX_M2R = {0};
 AX_PARAMS AX_M3R = {0};
 
 /* XC8 does not support designated initializers like C99 does. Use comments instead. */
-
 const AX_DEFAULT_PARAMS AX_M1R_D = {	//Set it to "const" in order to store in program memory
 	1,			//ID
 	3,			//BAUD_RATE - 500Kbps
