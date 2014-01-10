@@ -13,122 +13,89 @@
 
 void AX_Init(void)
 {
-	LEG_ANGLES = AX_Calculate_Leg_Angles(300, 150, -100);
-	if(LEG_ANGLES.Coxa == 0 && LEG_ANGLES.Femur == 0 && LEG_ANGLES.Tibia == 0){
-		//Cannot Reach
-	}else{
-		AX_Move_Leg(AX_M1R_D.ID, LEG_ANGLES.Coxa, LEG_ANGLES.Femur, LEG_ANGLES.Tibia, 100);
-	}
+	AX_Move_Leg(1, 330, 0, 0, 100);		//
 
-	AX_M1R = AX_Read_Params(AX_M1R_D.ID);
-	AX_M2R = AX_Read_Params(AX_M2R_D.ID);
-	AX_M3R = AX_Read_Params(AX_M3R_D.ID);
+	AX_F1R = AX_Read_Params(1);
+	AX_F2R = AX_Read_Params(2);
+	AX_F3R = AX_Read_Params(3);
 
 	//AX_Init_Legs();
-
-	//AX_Test();
 }
 
 void AX_Init_Legs(void)
 {
-	if(AX_M1R.PRESENT_POSITION != AX_M1R_D.HOME_POSITION){
-		AX_Go_To(AX_M1R_D.ID, AX_M1R_D.HOME_POSITION, 300);
+	if(AX_F1R.PRESENT_POSITION != AX_COXA_HOME_POSITION){
+		AX_Go_To(AX_F1R.ID, AX_COXA_HOME_POSITION, 300);
 	}
-	if(AX_M2R.PRESENT_POSITION != AX_M2R_D.HOME_POSITION){
-		AX_Go_To(AX_M2R_D.ID, AX_M2R_D.HOME_POSITION, 300);
+	if(AX_F2R.PRESENT_POSITION != AX_FEMUR_HOME_POSITION){
+		AX_Go_To(AX_F2R.ID, AX_FEMUR_HOME_POSITION, 300);
 	}
-	if(AX_M3R.PRESENT_POSITION != AX_M3R_D.HOME_POSITION){
-		AX_Go_To(AX_M3R_D.ID, AX_M3R_D.HOME_POSITION, 300);
+	if(AX_F3R.PRESENT_POSITION != AX_TIBIA_HOME_POSITION){
+		AX_Go_To(AX_F3R.ID, AX_TIBIA_HOME_POSITION, 300);
 	}
 }
 
-void AX_Flash(void)
+void AX_Flash()
 {
-	unsigned char AX_WRITE_FLASH_1[3];
-	unsigned char AX_WRITE_FLASH_2[5];
-	AX_WRITE_FLASH_1[0] = 2;
-	AX_WRITE_FLASH_1[1] = 16;
-	AX_WRITE_FLASH_1[2] = AX_FLASH_D.STATUS_RETURN_LEVEL;
-	AX_WRITE_FLASH_2[0] = 4;
-	AX_WRITE_FLASH_2[1] = 3;
-	AX_WRITE_FLASH_2[2] = AX_FLASH_D.ID;
-	AX_WRITE_FLASH_2[3] = AX_FLASH_D.BAUD_RATE;
-	AX_WRITE_FLASH_2[4] = AX_FLASH_D.DELAY_TIME;
-	AX_TX_Instruction(1, AX_WRITE, AX_WRITE_FLASH_1);
+	unsigned char AX_FLASH_1[] = {2,16,AX_STATUS_RETURN_LEVEL};
+	unsigned char AX_FLASH_2[] = {4,3,AX_FLASH_ID,AX_BAUD_RATE,AX_DELAY_TIME};
+	AX_TX_Instruction(1, AX_WRITE, AX_FLASH_1);
 	AX_RX_Status();
-	AX_TX_Instruction(1, AX_WRITE, AX_WRITE_FLASH_2);
+	AX_TX_Instruction(1, AX_WRITE, AX_FLASH_2);
 	AX_RX_Status();
 }
 
 void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int Speed)
 {
 	AX_WRITE_GOAL_POSITION[2] = Position & 0xFF;	//Position Low byte
-	AX_WRITE_GOAL_POSITION[3] = Position >> 8;	//Position High Byte
-	AX_WRITE_GOAL_POSITION[4] = Speed & 0xFF;	//Speed Low Byte
-	AX_WRITE_GOAL_POSITION[5] = Speed >> 8;		//Speed High Byte
+	AX_WRITE_GOAL_POSITION[3] = Position >> 8;		//Position High Byte
+	AX_WRITE_GOAL_POSITION[4] = Speed & 0xFF;		//Speed Low Byte
+	AX_WRITE_GOAL_POSITION[5] = Speed >> 8;			//Speed High Byte
 	AX_TX_Instruction(ID, AX_WRITE, AX_WRITE_GOAL_POSITION);
 }
 
 void AX_Test(void)
 {
-	unsigned short int Speed = 300;
-	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.HOME_POSITION, Speed);
-	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.HOME_POSITION, Speed);
-	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.HOME_POSITION, Speed);
-	while(AX_Is_Moving(AX_M1R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.CCW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M3R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M3R_D.ID, AX_M3R_D.CW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M3R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.CCW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M2R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M2R_D.ID, AX_M2R_D.CW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M2R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.CW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M1R_D.ID)){
-		__delay_ms(1);
-	};
-	AX_Go_To(AX_M1R_D.ID, AX_M1R_D.CCW_LIMIT, Speed);
-	while(AX_Is_Moving(AX_M1R_D.ID)){
-		__delay_ms(1);
-	};
+	
 }
 
-void AX_Move_Leg(unsigned char ID, double C, double F, double T, unsigned short int Speed){
-	AX_WRITE_LEG_GOAL_POSITION[3] = ID;				//Coxa ID
-	AX_WRITE_LEG_GOAL_POSITION[4] = (int)C & 0xFF;	//Coxa Position Low byte
-	AX_WRITE_LEG_GOAL_POSITION[5] = (int)C >> 8;	//Coxa Position High byte
-	AX_WRITE_LEG_GOAL_POSITION[6] = Speed & 0xFF;	//Coxa Speed Low Byte
-	AX_WRITE_LEG_GOAL_POSITION[7] = Speed >> 8;		//Coxa Speed High Byte
-	AX_WRITE_LEG_GOAL_POSITION[8] = ID+1;			//Femur ID
-	AX_WRITE_LEG_GOAL_POSITION[9] = (int)F & 0xFF;	//Femur Position Low byte
-	AX_WRITE_LEG_GOAL_POSITION[10] = (int)F >> 8;	//Femur Position High byte
-	AX_WRITE_LEG_GOAL_POSITION[11] = Speed & 0xFF;	//Femur Speed Low Byte
-	AX_WRITE_LEG_GOAL_POSITION[12] = Speed >> 8;	//Femur Speed High Byte
-	AX_WRITE_LEG_GOAL_POSITION[13] = ID+2;			//Tibia ID
-	AX_WRITE_LEG_GOAL_POSITION[14] = (int)T & 0xFF;	//Tibia Position Low byte
-	AX_WRITE_LEG_GOAL_POSITION[15] = (int)T >> 8;	//Tibia Position High byte
-	AX_WRITE_LEG_GOAL_POSITION[16] = Speed & 0xFF;	//Tibia Speed Low Byte
-	AX_WRITE_LEG_GOAL_POSITION[17] = Speed >> 8;	//Tibia Speed High Byte
-	AX_TX_Instruction(254, AX_SYNC_WRITE, AX_WRITE_LEG_GOAL_POSITION);
+unsigned char AX_Move_Leg(unsigned char Leg, double C, double F, double T, unsigned short int Speed){
+	AX_Calculate_Leg_Angles(C, F, T);
+	if(LEG_ANGLES.Coxa == 0 && LEG_ANGLES.Femur == 0 && LEG_ANGLES.Tibia == 0){
+		ERRORS.CANNOT_REACH = 1;
+		return 0;
+	}else{
+		if(AX_Check_Angle_Limits()){
+			AX_WRITE_LEG_GOAL_POSITION[3] = AX_SERVO_ID[Leg-1][0];			//Coxa ID
+			AX_WRITE_LEG_GOAL_POSITION[4] = (int)LEG_ANGLES.Coxa & 0xFF;	//Coxa Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[5] = (int)LEG_ANGLES.Coxa >> 8;		//Coxa Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[6] = Speed & 0xFF;					//Coxa Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[7] = Speed >> 8;						//Coxa Speed High Byte
+			AX_WRITE_LEG_GOAL_POSITION[8] = AX_SERVO_ID[Leg-1][1];			//Femur ID
+			AX_WRITE_LEG_GOAL_POSITION[9] = (int)LEG_ANGLES.Femur & 0xFF;	//Femur Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[10] = (int)LEG_ANGLES.Femur >> 8;	//Femur Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[11] = Speed & 0xFF;					//Femur Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[12] = Speed >> 8;					//Femur Speed High Byte
+			AX_WRITE_LEG_GOAL_POSITION[13] = AX_SERVO_ID[Leg-1][2];			//Tibia ID
+			AX_WRITE_LEG_GOAL_POSITION[14] = (int)LEG_ANGLES.Tibia & 0xFF;	//Tibia Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[15] = (int)LEG_ANGLES.Tibia >> 8;	//Tibia Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[16] = Speed & 0xFF;					//Tibia Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[17] = Speed >> 8;					//Tibia Speed High Byte
+			AX_TX_Instruction(254, AX_SYNC_WRITE, AX_WRITE_LEG_GOAL_POSITION);
+			ERRORS.CANNOT_REACH = 0;
+			return 1;
+		}else{
+			return 0;
+		}
+	}
+
 }
 
-struct AX_LEG_ANGLES AX_Calculate_Leg_Angles(double X, double Y, double Z)
+void AX_Calculate_Leg_Angles(double X, double Y, double Z)
 {
 	double a, d, h;
 	//Femur-Tibia Joint coordinates starting from Femur-Coxa Bracket point
 	POINT_2D JOINT;
-	AX_LEG_ANGLES ANGLES;
 	//Calculate the distance between the centres of the circles in Z plane
 	d = sqrt(pow(X-COXA_LENGTH, 2)+pow(Z, 2));
 	//Check for solutions
@@ -141,23 +108,39 @@ struct AX_LEG_ANGLES AX_Calculate_Leg_Angles(double X, double Y, double Z)
 		//Check Coxa Quarter and find Coxa Polar Angle in rad
 		//The Coxa can only move in Quarter I and IV, therefore X is always positive
 		//Also trasfer the angle in rad into AX type
-		ANGLES.Coxa = (COXA_POLAR_ANGLE+(atan2(Y,X)*180/M_PI))/0.29;
+		LEG_ANGLES.Coxa = (COXA_POLAR_ANGLE+(atan2(Y,X)*180/M_PI))/0.29;
 		//Check Femur Quarter and find Femur Polar Angle in rad
 		//Also trasfer the angle in rad into AX type
 		a = atan2(JOINT.Y, JOINT.X)*180/M_PI;
-		ANGLES.Femur = (FEMUR_POLAR_ANGLE-a)/0.29;
+		LEG_ANGLES.Femur = (FEMUR_POLAR_ANGLE-a)/0.29;
 		//Check Tibia Quarter and find Tibia Polar Angle in rad
 		//Also trasfer the angle in rad into AX type
 		d = atan2(Z-JOINT.Y, X-COXA_LENGTH-JOINT.X)*180/M_PI;
-		ANGLES.Tibia = (TIBIA_POLAR_ANGLE+d-a)/0.29;
-		a=h;	//Breakpoint
-		return ANGLES;
+		LEG_ANGLES.Tibia = (TIBIA_POLAR_ANGLE+d-a)/0.29;
 	}else{
 		//If unreachable set all angles to zero
-		ANGLES.Coxa = 0;
-		ANGLES.Femur = 0;
-		ANGLES.Tibia = 0;
-		return ANGLES;
+		LEG_ANGLES.Coxa = 0;
+		LEG_ANGLES.Femur = 0;
+		LEG_ANGLES.Tibia = 0;
+	}
+}
+
+unsigned char AX_Check_Angle_Limits()
+{
+	if(LEG_ANGLES.Coxa < AX_COXA_CW_LIMIT || LEG_ANGLES.Coxa > AX_COXA_CCW_LIMIT){
+		ERRORS.COXA_ANGLE_LIMITS = 1;
+		return 0;
+	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
+		ERRORS.FEMUR_ANGLE_LIMITS = 1;
+		return 0;
+	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
+		ERRORS.TIBIA_ANGLE_LIMITS = 1;
+		return 0;
+	}else{
+		ERRORS.COXA_ANGLE_LIMITS = 0;
+		ERRORS.FEMUR_ANGLE_LIMITS = 0;
+		ERRORS.TIBIA_ANGLE_LIMITS = 0;
+		return 1;
 	}
 }
 
@@ -196,7 +179,7 @@ void AX_TX_Instruction_With_Status(unsigned char ID, const unsigned char Instruc
 {
 	AX_TX_Instruction(ID, Instruction, Parameters);
 	AX_RX_Status();
-	while(RX1_Error){	//Error check, if true send instruction again.
+	while(ERRORS.RX){	//Error check, if true send instruction again.
 		AX_TX_Instruction(ID, Instruction, Parameters);
 		AX_RX_Status();
 	}
@@ -212,22 +195,17 @@ void AX_RX_Status(void)
 			Length += RX1_Buffer[3];
 		}
 		if(i == 4 && (RX1_Buffer[4] > 0 || RX1_Buffer[3] > 5)){
-			RX1_Error = 1;
+			ERRORS.RX = 1;
 			break;
 		}else{
-			RX1_Error = 0;
+			ERRORS.RX = 0;
 		}
 	}
 }
 
-unsigned char AX_Is_Moving(unsigned char ID)
-{
-	AX_TX_Instruction_With_Status(ID, AX_READ, AX_READ_MOVING);
-	return RX1_Buffer[5];
-}
-
 unsigned short int AX_Read_Present_Position(unsigned char ID)
 {
+	unsigned char AX_READ_PRESENT_POSITION[] = {2,36,2};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_POSITION);
 	AX_RX_Status();
 	return TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
@@ -235,6 +213,7 @@ unsigned short int AX_Read_Present_Position(unsigned char ID)
 
 unsigned short int AX_Read_Present_Speed(unsigned char ID)
 {
+	unsigned char AX_READ_PRESENT_SPEED[] = {2,38,2};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_SPEED);
 	AX_RX_Status();
 	return TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
@@ -242,6 +221,7 @@ unsigned short int AX_Read_Present_Speed(unsigned char ID)
 
 unsigned short int AX_Read_Present_Load(unsigned char ID)
 {
+	unsigned char AX_READ_PRESENT_LOAD[] = {2,40,2};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_LOAD);
 	AX_RX_Status();
 	return TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
@@ -249,6 +229,7 @@ unsigned short int AX_Read_Present_Load(unsigned char ID)
 
 unsigned char AX_Read_Present_Voltage(unsigned char ID)
 {
+	unsigned char AX_READ_PRESENT_VOLTAGE[] = {2,42,1};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_VOLTAGE);
 	AX_RX_Status();
 	return RX1_Buffer[5];
@@ -256,6 +237,7 @@ unsigned char AX_Read_Present_Voltage(unsigned char ID)
 
 unsigned char AX_Read_Present_Temperature(unsigned char ID)
 {
+	unsigned char AX_READ_PRESENT_TEMPERATURE[] = {2,43,1};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_PRESENT_TEMPERATURE);
 	AX_RX_Status();
 	return RX1_Buffer[5];
@@ -263,6 +245,7 @@ unsigned char AX_Read_Present_Temperature(unsigned char ID)
 
 unsigned char AX_Read_Moving(unsigned char ID)
 {
+	unsigned char AX_READ_MOVING[] = {2,46,1};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_MOVING);
 	AX_RX_Status();
 	return RX1_Buffer[5];
@@ -270,6 +253,7 @@ unsigned char AX_Read_Moving(unsigned char ID)
 
 unsigned char AX_Read_Lock(unsigned char ID)
 {
+	unsigned char AX_READ_LOCK[] = {2,47,1};
 	AX_TX_Instruction(ID, AX_READ, AX_READ_LOCK);
 	AX_RX_Status();
 	return RX1_Buffer[5];

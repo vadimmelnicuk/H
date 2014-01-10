@@ -42,7 +42,7 @@ void Init(void)
 	BAUDCON1bits.BRG16 = 1;
 	BAUDCON1bits.CKTXP = 0;
 
-	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE)-1;
+	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE_KBPS)-1;
 
 	TXSTA1bits.BRGH = 1;
 	TXSTA1bits.SYNC = 0;

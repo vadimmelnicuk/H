@@ -9,35 +9,12 @@
 #ifndef DYNAMIXEL_H
 #define	DYNAMIXEL_H
 
-//Function prototypes
-void AX_Init(void);
-void AX_Init_Legs(void);
-void AX_Flash(void);
-void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
-void AX_Test(void);
-void AX_Move_Leg(unsigned char, double, double, double, unsigned short int);
-struct AX_LEG_ANGLES AX_Calculate_Leg_Angles(double, double, double);
-void AX_Ping(unsigned char);
-void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
-void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
-void AX_RX_Status(void);
-unsigned char AX_Is_Moving(unsigned char);
-unsigned short int AX_Read_Present_Position(unsigned char);
-unsigned short int AX_Read_Goal_Position(unsigned char);
-unsigned short int AX_Read_Present_Speed(unsigned char);
-unsigned short int AX_Read_Present_Load(unsigned char);
-unsigned char AX_Read_Present_Voltage(unsigned char);
-unsigned char AX_Read_Present_Temperature(unsigned char);
-unsigned char AX_Read_Moving(unsigned char);
-unsigned char AX_Read_Lock(unsigned char);
-struct AX_PARAMS AX_Read_Params(unsigned char);
-
 //Structures
 struct POINT_2D {
 	double X;
 	double Y;
 };
-typedef struct POINT_2D POINT_2D;
+typedef struct POINT_2D POINT_2D;		//Declaration of type
 
 struct POINT_3D {
 	double X;
@@ -65,7 +42,6 @@ struct AX_PARAMS {
 	unsigned short int MAX_TORQUE;
 	unsigned char STATUS_RETURN_LEVEL;
 	unsigned short int PRESENT_POSITION;
-	unsigned short int GOAL_POSITION;
 	unsigned short int PRESENT_SPEED;
 	unsigned short int PRESENT_LOAD;
 	unsigned char PRESENT_VOLTAGE;
@@ -73,31 +49,16 @@ struct AX_PARAMS {
 	unsigned char MOVING;
 	unsigned char LOCK;
 };
-typedef struct AX_PARAMS AX_PARAMS;	//Declaration of type
+typedef struct AX_PARAMS AX_PARAMS;
 
-struct AX_DEFAULT_PARAMS {
-	unsigned char ID;
-	unsigned char BAUD_RATE;
-	unsigned char DELAY_TIME;
-	unsigned short int CW_LIMIT;
-	unsigned short int CCW_LIMIT;
-	unsigned char HIGHEST_LIMIT_TEMPERATURE;
-	unsigned char LOWEST_LIMIT_VOLTAGE;
-	unsigned char HIGHEST_LIMIT_VOLTAGE;
-	unsigned short int MAX_TORQUE;
-	unsigned char STATUS_RETURN_LEVEL;
-	unsigned char LOCK;
-	unsigned short int HOME_POSITION;
+struct AX_ERRORS {
+	unsigned char RX;
+	unsigned char CANNOT_REACH;
+	unsigned char COXA_ANGLE_LIMITS;
+	unsigned char FEMUR_ANGLE_LIMITS;
+	unsigned char TIBIA_ANGLE_LIMITS;
 };
-typedef struct AX_DEFAULT_PARAMS AX_DEFAULT_PARAMS;
-
-struct AX_FLASH_PARAMS {
-	unsigned char ID;
-	unsigned char BAUD_RATE;
-	unsigned char DELAY_TIME;
-	unsigned char STATUS_RETURN_LEVEL;
-};
-typedef struct AX_FLASH_PARAMS AX_FLASH_PARAMS;
+typedef struct AX_ERRORS AX_ERRORS;
 
 /*
 The BANK SIZE is limited to hold a variable with the maximum size of 256 bytes
@@ -106,20 +67,62 @@ All 6 Legs will ne initialised seperatly without holding them in one global stru
 representing whole Hexapod.
 */
 
+//Function prototypes
+void AX_Init(void);
+void AX_Init_Legs(void);
+void AX_Flash();
+void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
+void AX_Test(void);
+unsigned char AX_Move_Leg(unsigned char, double, double, double, unsigned short int);
+void AX_Calculate_Leg_Angles(double, double, double);
+unsigned char AX_Check_Angle_Limits();
+void AX_Ping(unsigned char);
+void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
+void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
+void AX_RX_Status(void);
+unsigned short int AX_Read_Present_Position(unsigned char);
+unsigned short int AX_Read_Goal_Position(unsigned char);
+unsigned short int AX_Read_Present_Speed(unsigned char);
+unsigned short int AX_Read_Present_Load(unsigned char);
+unsigned char AX_Read_Present_Voltage(unsigned char);
+unsigned char AX_Read_Present_Temperature(unsigned char);
+unsigned char AX_Read_Moving(unsigned char);
+unsigned char AX_Read_Lock(unsigned char);
+struct AX_PARAMS AX_Read_Params(unsigned char);
+
 //Defines
 #ifdef MODE_DEV
-	#define AX_BAUD_RATE 500000
+	#define AX_BAUD_RATE_KBPS 500000		//500 Kbps
 #endif
 #ifdef MODE_FLASH
-	#define AX_BAUD_RATE 1000000
+	#define AX_BAUD_RATE_KBPS 1000000		//1 Mbps
 #endif
 
-#define COXA_LENGTH 45.0		//Coxa -> Femur (mm)
-#define FEMUR_LENGTH 120.0		//Femur -> Tibia (mm)
-#define TIBIA_LENGTH 166.0		//Tibia -> End of foot (mm)
-#define COXA_POLAR_ANGLE 150.0	//
-#define FEMUR_POLAR_ANGLE 255.0	//Fix the Femur Polar Angle since the part is bended
-#define TIBIA_POLAR_ANGLE 225.0	//Fix the Tibia Polar Angle
+//AX Default Settings
+#define AX_FLASH_ID 1						//Set desired ID for flashed servo
+#define AX_BAUD_RATE 3						//500 Kbps
+#define AX_DELAY_TIME 250					//250 us
+#define AX_COXA_CW_LIMIT 207				//60 Deg
+#define AX_COXA_CCW_LIMIT 827				//240 Deg
+#define AX_FEMUR_CW_LIMIT 483				//140 Deg
+#define AX_FEMUR_CCW_LIMIT 1023				//300 Deg
+#define AX_TIBIA_CW_LIMIT 240				//70 Deg
+#define AX_TIBIA_CCW_LIMIT 1023				//300 Deg
+#define AX_HIGHEST_LIMIT_TEMPERATURE 140	//70 Deg Celsius
+#define AX_LOWEST_LIMIT_VOLTAGE 60			//6 V
+#define AX_HIGHEST_LIMIT_VOLTAGE 140		//14 V
+#define AX_MAX_TORQUE 1023					//100 %
+#define AX_STATUS_RETURN_LEVEL 1			//
+#define AX_LOCK 0							//
+#define AX_COXA_HOME_POSITION 512			//150 Deg
+#define AX_FEMUR_HOME_POSITION 483			//140 Deg
+#define AX_TIBIA_HOME_POSITION 310			//90 Deg
+#define COXA_LENGTH 45.0					//Coxa->Femur (mm)
+#define FEMUR_LENGTH 120.0					//Femur->Tibia (mm)
+#define TIBIA_LENGTH 166.0					//Tibia->End of foot (mm)
+#define COXA_POLAR_ANGLE 150.0				//
+#define FEMUR_POLAR_ANGLE 255.0				//Fix the Femur Polar Angle since the part is bended
+#define TIBIA_POLAR_ANGLE 225.0				//Fix the Tibia Polar Angle
 
 //Global variables
 const unsigned char AX_PING = 1;
@@ -133,14 +136,6 @@ unsigned char AX_READ_LOWEST_LIMIT_VOLTAGE[] = {2,12,1};
 unsigned char AX_READ_HIGHEST_LIMIT_VOLTAGE[] = {2,13,1};
 unsigned char AX_READ_MAX_TORQUE[] = {2,14,2};
 unsigned char AX_READ_STATUS_RETURN_LEVEL[] = {2,16,1};
-unsigned char AX_READ_TORQUE_EN[] = {2,24,1};
-unsigned char AX_READ_PRESENT_POSITION[] = {2,36,2};
-unsigned char AX_READ_PRESENT_SPEED[] = {2,38,2};
-unsigned char AX_READ_PRESENT_LOAD[] = {2,40,2};
-unsigned char AX_READ_PRESENT_VOLTAGE[] = {2,42,1};
-unsigned char AX_READ_PRESENT_TEMPERATURE[] = {2,43,1};
-unsigned char AX_READ_MOVING[] = {2,46,1};
-unsigned char AX_READ_LOCK[] = {2,47,1};
 
 const unsigned char AX_WRITE = 3;
 const unsigned char AX_SYNC_WRITE = 131;
@@ -162,64 +157,17 @@ unsigned char AX_WRITE_GOAL_POSITION[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_GOAL_POSITION_HOME[] = {5,30,0,2,0,2};
 unsigned char AX_WRITE_LEG_GOAL_POSITION[] = {17,30,4,0,0,2,0,2,0,0,2,0,2,0,0,2,0,2};
 
+unsigned char AX_SERVO_ID[6][3] = {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
+
 //Declare structs in .h in order to make them global
 POINT_3D TARGET_POINT = {0};
 AX_LEG_ANGLES LEG_ANGLES = {0};
-AX_PARAMS AX_M1R = {0};
-AX_PARAMS AX_M2R = {0};
-AX_PARAMS AX_M3R = {0};
+AX_PARAMS AX_F1R = {0};
+AX_PARAMS AX_F2R = {0};
+AX_PARAMS AX_F3R = {0};
+AX_ERRORS ERRORS = {0};
 
 /* XC8 does not support designated initializers like C99 does. Use comments instead. */
-const AX_DEFAULT_PARAMS AX_M1R_D = {	//Set it to "const" in order to store in program memory
-	1,			//ID
-	3,			//BAUD_RATE - 500Kbps
-	250,		//DELAY_TYME - 250us
-	207,		//CW_LIMIT - 60 Degrees
-	827,		//CCW_LIMIT - 240 Degrees
-	70,			//HIGHEST_LIMIT_TEMPERATURE
-	60,			//LOWEST_LIMIT_VOLTAGE
-	140,		//HIGHEST_LIMIT_VOLTAGE
-	1023,		//MAX_TORQUE
-	1,			//STATUS_RETURN_LEVEL
-	0,			//LOCK
-	512,		//HOME POSITION
-};
-
-const AX_DEFAULT_PARAMS AX_M2R_D = {
-	2,			//ID
-	3,			//BAUD_RATE - 500Kbps
-	250,		//DELAY_TYME - 250us
-	483,		//CW_LIMIT - 140 Degrees
-	1023,		//CCW_LIMIT - 300 Degrees
-	70,			//HIGHEST_LIMIT_TEMPERATURE
-	60,			//LOWEST_LIMIT_VOLTAGE
-	140,		//HIGHEST_LIMIT_VOLTAGE
-	1023,		//MAX_TORQUE
-	1,			//STATUS_RETURN_LEVEL
-	0,			//LOCK
-	483,		//HOME POSITION
-};
-
-const AX_DEFAULT_PARAMS AX_M3R_D = {
-	3,			//ID
-	3,			//BAUD_RATE - 500Kbps
-	250,		//DELAY_TYME - 250us
-	310,		//CW_LIMIT - 90 Degrees
-	690,		//CCW_LIMIT - 200 Degrees
-	70,			//HIGHEST_LIMIT_TEMPERATURE
-	60,			//LOWEST_LIMIT_VOLTAGE
-	140,		//HIGHEST_LIMIT_VOLTAGE
-	1023,		//MAX_TORQUE
-	1,			//STATUS_RETURN_LEVEL
-	0,			//LOCK
-	310,		//HOME POSITION
-};
-
-const AX_FLASH_PARAMS AX_FLASH_D = {	//Struct to hold default target flashing setting
-	3,			//ID
-	3,			//BAUD_RATE - 500Kbps
-	250,		//DELAY_TYME - 250us
-	1,			//STATUS_RETURN_LEVEL
-};
+//Set it to "const" in order to store in program memory
 
 #endif	//DYNAMIXEL_H
