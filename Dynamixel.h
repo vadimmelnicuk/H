@@ -69,25 +69,19 @@ representing whole Hexapod.
 
 //Function prototypes
 void AX_Init(void);
-void AX_Init_Legs(void);
+void AX_Init_Leg(unsigned char);
 void AX_Flash();
 void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
 void AX_Test(void);
-unsigned char AX_Move_Leg(unsigned char, double, double, double, unsigned short int);
-void AX_Calculate_Leg_Angles(double, double, double);
+void AX_Move_Leg(unsigned char, unsigned char, unsigned short int, double, double, double);
+unsigned char AX_Leg_Moving(unsigned char);
+void AX_Leg_Angles(double, double, double);
 unsigned char AX_Check_Angle_Limits();
+void AX_Starting_Position(unsigned char);
 void AX_Ping(unsigned char);
-void AX_TX_Instruction(unsigned char, const unsigned char, unsigned char *);
-void AX_TX_Instruction_With_Status(unsigned char, const unsigned char, unsigned char *);
+void AX_TX_I(unsigned char, const unsigned char, unsigned char *);
+unsigned short int AX_TX_IS(unsigned char, const unsigned char, unsigned char *);
 void AX_RX_Status(void);
-unsigned short int AX_Read_Present_Position(unsigned char);
-unsigned short int AX_Read_Goal_Position(unsigned char);
-unsigned short int AX_Read_Present_Speed(unsigned char);
-unsigned short int AX_Read_Present_Load(unsigned char);
-unsigned char AX_Read_Present_Voltage(unsigned char);
-unsigned char AX_Read_Present_Temperature(unsigned char);
-unsigned char AX_Read_Moving(unsigned char);
-unsigned char AX_Read_Lock(unsigned char);
 struct AX_PARAMS AX_Read_Params(unsigned char);
 
 //Defines
@@ -104,7 +98,7 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 #define AX_DELAY_TIME 250					//250 us
 #define AX_COXA_CW_LIMIT 207				//60 Deg
 #define AX_COXA_CCW_LIMIT 827				//240 Deg
-#define AX_FEMUR_CW_LIMIT 483				//140 Deg
+#define AX_FEMUR_CW_LIMIT 470				//136 Deg
 #define AX_FEMUR_CCW_LIMIT 1023				//300 Deg
 #define AX_TIBIA_CW_LIMIT 240				//70 Deg
 #define AX_TIBIA_CCW_LIMIT 1023				//300 Deg
@@ -115,9 +109,9 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 #define AX_STATUS_RETURN_LEVEL 1			//
 #define AX_LOCK 0							//
 #define AX_COXA_HOME_POSITION 512			//150 Deg
-#define AX_FEMUR_HOME_POSITION 483			//140 Deg
-#define AX_TIBIA_HOME_POSITION 310			//90 Deg
-#define COXA_LENGTH 45.0					//Coxa->Femur (mm)
+#define AX_FEMUR_HOME_POSITION 470			//140 Deg
+#define AX_TIBIA_HOME_POSITION 240			//90 Deg
+#define COXA_LENGTH 43.0					//Coxa->Femur (mm)
 #define FEMUR_LENGTH 120.0					//Femur->Tibia (mm)
 #define TIBIA_LENGTH 166.0					//Tibia->End of foot (mm)
 #define COXA_POLAR_ANGLE 150.0				//
@@ -136,6 +130,13 @@ unsigned char AX_READ_LOWEST_LIMIT_VOLTAGE[] = {2,12,1};
 unsigned char AX_READ_HIGHEST_LIMIT_VOLTAGE[] = {2,13,1};
 unsigned char AX_READ_MAX_TORQUE[] = {2,14,2};
 unsigned char AX_READ_STATUS_RETURN_LEVEL[] = {2,16,1};
+unsigned char AX_READ_PRESENT_POSITION[] = {2,36,2};
+unsigned char AX_READ_PRESENT_SPEED[] = {2,38,2};
+unsigned char AX_READ_PRESENT_LOAD[] = {2,40,2};
+unsigned char AX_READ_PRESENT_VOLTAGE[] = {2,42,1};
+unsigned char AX_READ_PRESENT_TEMPERATURE[] = {2,43,1};
+unsigned char AX_READ_MOVING[] = {2,46,1};
+unsigned char AX_READ_LOCK[] = {2,47,1};
 
 const unsigned char AX_WRITE = 3;
 const unsigned char AX_SYNC_WRITE = 131;
@@ -160,7 +161,7 @@ unsigned char AX_WRITE_LEG_GOAL_POSITION[] = {17,30,4,0,0,2,0,2,0,0,2,0,2,0,0,2,
 unsigned char AX_SERVO_ID[6][3] = {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15},{16,17,18}};
 
 //Declare structs in .h in order to make them global
-POINT_3D TARGET_POINT = {0};
+POINT_3D STARTING_POSITION = {0};
 AX_LEG_ANGLES LEG_ANGLES = {0};
 AX_PARAMS AX_F1R = {0};
 AX_PARAMS AX_F2R = {0};

@@ -23,11 +23,14 @@ void Init(void)
 
 	TRISAbits.TRISA0 = 0;		//RA0 - Output
 	TRISAbits.TRISA1 = 0;		//RA1 - Output
+	TRISCbits.TRISC3 = 0;		//RC3 - Output
 	TRISCbits.TRISC6 = 1;		//RC6 - Input
 	TRISCbits.TRISC7 = 1;		//RC7 - Input
 
 	PORTA = 0;
 	PORTC = 0;
+
+	PORTCbits.RC3 = 1;
 
 	//Interrupts
 	RCONbits.IPEN = 1;
