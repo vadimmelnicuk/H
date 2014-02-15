@@ -17,9 +17,9 @@ void AX_Init(void)
 	AX_F2R = AX_Read_Params(2);
 	AX_F3R = AX_Read_Params(3);
 
-	//AX_Init_Leg(1);
+	AX_Init_Leg(1);
 
-	AX_Move_Leg(1, 10, 50, 100, 0, -50);
+	//AX_Move_Leg(1, 50, 100, 0, -50);
 
 	while(1){
 		//AX_Test();
@@ -28,9 +28,10 @@ void AX_Init(void)
 
 void AX_Init_Leg(unsigned char Leg)
 {
-	AX_Go_To(AX_SERVO_ID[Leg-1][0], AX_COXA_HOME_POSITION, 100);
-	AX_Go_To(AX_SERVO_ID[Leg-1][1], AX_FEMUR_HOME_POSITION, 100);
-	AX_Go_To(AX_SERVO_ID[Leg-1][2], AX_TIBIA_HOME_POSITION, 100);
+	Leg -= 1;										//Convert to leg array number
+	AX_Go_To(AX_SERVO_ID[Leg][0], AX_COXA_HOME_POSITION, 100);
+	AX_Go_To(AX_SERVO_ID[Leg][1], AX_FEMUR_HOME_POSITION, 100);
+	AX_Go_To(AX_SERVO_ID[Leg][2], AX_TIBIA_HOME_POSITION, 100);
 }
 
 void AX_Flash()
@@ -38,9 +39,9 @@ void AX_Flash()
 	unsigned char AX_FLASH_1[] = {2,16,AX_STATUS_RETURN_LEVEL};
 	unsigned char AX_FLASH_2[] = {4,3,AX_FLASH_ID,AX_BAUD_RATE,AX_DELAY_TIME};
 	AX_TX_I(1, AX_WRITE, AX_FLASH_1);
-	AX_RX_Status();
+	AX_RX_S();
 	AX_TX_I(1, AX_WRITE, AX_FLASH_2);
-	AX_RX_Status();
+	AX_RX_S();
 }
 
 void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int Speed)
@@ -54,56 +55,49 @@ void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int 
 
 void AX_Test(void)
 {
-	AX_Move_Leg(1, 10, 50, 150, -100, -100);		//Leg, Steps, Speed, Coxa, Femur, Tibia
+	AX_Move_Leg(1, 50, 150, -100, -100);			//Leg, Steps, Speed, Coxa, Femur, Tibia
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
-	AX_Move_Leg(1, 10, 50, 150, 100, -100);
+	AX_Move_Leg(1, 50, 150, 100, -100);
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
 }
 
-void AX_Move_Leg(unsigned char Leg, unsigned char Steps, unsigned short int Speed, double X, double Y, double Z){
-	unsigned char SpeedL, SpeedH, i;
-	POINT_3D STEP;
-	AX_Starting_Position(Leg);
-	for(i=1;i<=Steps;i++){
-		STEP.X = X+(X-STARTING_POSITION.X)/Steps*i;
-		STEP.Y = Y+(Y-STARTING_POSITION.Y)/Steps*i;
-		STEP.Z = Z+(Z-STARTING_POSITION.Z)/Steps*i;
-		AX_Leg_Angles(STEP.X, STEP.Y, STEP.Z);
-		if(LEG_ANGLES.Coxa == 0 && LEG_ANGLES.Femur == 0 && LEG_ANGLES.Tibia == 0){
-			ERRORS.CANNOT_REACH = 1;
-		}else{
-			if(AX_Check_Angle_Limits()){
-				SpeedL = Speed & 0xFF;
-				SpeedH = Speed >> 8;
-				AX_WRITE_LEG_GOAL_POSITION[3] = AX_SERVO_ID[Leg-1][0];			//Coxa ID
-				AX_WRITE_LEG_GOAL_POSITION[4] = (int)LEG_ANGLES.Coxa & 0xFF;	//Coxa Position Low byte
-				AX_WRITE_LEG_GOAL_POSITION[5] = (int)LEG_ANGLES.Coxa >> 8;		//Coxa Position High byte
-				AX_WRITE_LEG_GOAL_POSITION[6] = SpeedL;							//Coxa Speed Low Byte
-				AX_WRITE_LEG_GOAL_POSITION[7] = SpeedH;							//Coxa Speed High Byte
-				AX_WRITE_LEG_GOAL_POSITION[8] = AX_SERVO_ID[Leg-1][1];			//Femur ID
-				AX_WRITE_LEG_GOAL_POSITION[9] = (int)LEG_ANGLES.Femur & 0xFF;	//Femur Position Low byte
-				AX_WRITE_LEG_GOAL_POSITION[10] = (int)LEG_ANGLES.Femur >> 8;	//Femur Position High byte
-				AX_WRITE_LEG_GOAL_POSITION[11] = SpeedL;						//Femur Speed Low Byte
-				AX_WRITE_LEG_GOAL_POSITION[12] = SpeedH;						//Femur Speed High Byte
-				AX_WRITE_LEG_GOAL_POSITION[13] = AX_SERVO_ID[Leg-1][2];			//Tibia ID
-				AX_WRITE_LEG_GOAL_POSITION[14] = (int)LEG_ANGLES.Tibia & 0xFF;	//Tibia Position Low byte
-				AX_WRITE_LEG_GOAL_POSITION[15] = (int)LEG_ANGLES.Tibia >> 8;	//Tibia Position High byte
-				AX_WRITE_LEG_GOAL_POSITION[16] = SpeedL;						//Tibia Speed Low Byte
-				AX_WRITE_LEG_GOAL_POSITION[17] = SpeedH;						//Tibia Speed High Byte
-				AX_TX_I(254, AX_SYNC_WRITE, AX_WRITE_LEG_GOAL_POSITION);
-				ERRORS.CANNOT_REACH = 0;
-				while(AX_Leg_Moving(Leg)){__delay_ms(10);}
-			}
+void AX_Move_Leg(unsigned char Leg, unsigned short int Speed, double X, double Y, double Z){
+	unsigned char SpeedL, SpeedH;
+	Leg -= 1;										//Convert to leg array number
+	AX_Leg_Angles(X, Y, Z);
+	if(LEG_ANGLES.Coxa == 0 && LEG_ANGLES.Femur == 0 && LEG_ANGLES.Tibia == 0){
+		
+	}else{
+		if(AX_Check_Angle_Limits()){
+			SpeedL = Speed & 0xFF;
+			SpeedH = Speed >> 8;
+			AX_WRITE_LEG_GOAL_POSITION[3] = AX_SERVO_ID[Leg][0];			//Coxa ID
+			AX_WRITE_LEG_GOAL_POSITION[4] = (int)LEG_ANGLES.Coxa & 0xFF;	//Coxa Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[5] = (int)LEG_ANGLES.Coxa >> 8;		//Coxa Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[6] = SpeedL;							//Coxa Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[7] = SpeedH;							//Coxa Speed High Byte
+			AX_WRITE_LEG_GOAL_POSITION[8] = AX_SERVO_ID[Leg][1];			//Femur ID
+			AX_WRITE_LEG_GOAL_POSITION[9] = (int)LEG_ANGLES.Femur & 0xFF;	//Femur Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[10] = (int)LEG_ANGLES.Femur >> 8;	//Femur Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[11] = SpeedL;						//Femur Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[12] = SpeedH;						//Femur Speed High Byte
+			AX_WRITE_LEG_GOAL_POSITION[13] = AX_SERVO_ID[Leg][2];			//Tibia ID
+			AX_WRITE_LEG_GOAL_POSITION[14] = (int)LEG_ANGLES.Tibia & 0xFF;	//Tibia Position Low byte
+			AX_WRITE_LEG_GOAL_POSITION[15] = (int)LEG_ANGLES.Tibia >> 8;	//Tibia Position High byte
+			AX_WRITE_LEG_GOAL_POSITION[16] = SpeedL;						//Tibia Speed Low Byte
+			AX_WRITE_LEG_GOAL_POSITION[17] = SpeedH;						//Tibia Speed High Byte
+			AX_TX_I(254, AX_SYNC_WRITE, AX_WRITE_LEG_GOAL_POSITION);
+			while(AX_Leg_Moving(Leg)){__delay_ms(10);}
 		}
 	}
-	
 }
 
 unsigned char AX_Leg_Moving(unsigned char Leg)
 {
 	unsigned char i;
+	Leg -= 1;										//Convert to leg array number
 	for(i=0;i<=2;i++){
-		if(AX_TX_IS(AX_SERVO_ID[Leg-1][i], AX_READ, AX_READ_MOVING)){
+		if(AX_TX_IS(AX_SERVO_ID[Leg][i], AX_READ, AX_READ_MOVING)){
 			return 1;
 		}
 	}
@@ -148,28 +142,23 @@ void AX_Leg_Angles(double X, double Y, double Z)
 unsigned char AX_Check_Angle_Limits()
 {
 	if(LEG_ANGLES.Coxa < AX_COXA_CW_LIMIT || LEG_ANGLES.Coxa > AX_COXA_CCW_LIMIT){
-		ERRORS.COXA_ANGLE_LIMITS = 1;
-		return 0;
-	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
-		ERRORS.FEMUR_ANGLE_LIMITS = 1;
-		return 0;
-	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
-		ERRORS.TIBIA_ANGLE_LIMITS = 1;
-		return 0;
-	}else{
-		ERRORS.COXA_ANGLE_LIMITS = 0;
-		ERRORS.FEMUR_ANGLE_LIMITS = 0;
-		ERRORS.TIBIA_ANGLE_LIMITS = 0;
 		return 1;
+	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
+		return 1;
+	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
+		return 1;
+	}else{
+		return 0;
 	}
 }
 
 void AX_Starting_Position(unsigned char Leg)
 {
 	AX_LEG_ANGLES ANGLES;
-	ANGLES.Coxa = (AX_TX_IS(AX_SERVO_ID[Leg-1][0], AX_READ, AX_READ_PRESENT_POSITION)*0.29-COXA_POLAR_ANGLE)*M_PI/180;
-	ANGLES.Femur = (FEMUR_POLAR_ANGLE-AX_TX_IS(AX_SERVO_ID[Leg-1][1], AX_READ, AX_READ_PRESENT_POSITION)*0.29)*M_PI/180;
-	ANGLES.Tibia = (AX_TX_IS(AX_SERVO_ID[Leg-1][2], AX_READ, AX_READ_PRESENT_POSITION)*0.29+ANGLES.Femur-TIBIA_POLAR_ANGLE)*M_PI/180;
+	Leg -= 1;										//Convert to leg array number
+	ANGLES.Coxa = (AX_TX_IS(AX_SERVO_ID[Leg][0], AX_READ, AX_READ_PRESENT_POSITION)*0.29-COXA_POLAR_ANGLE)*M_PI/180;
+	ANGLES.Femur = (FEMUR_POLAR_ANGLE-AX_TX_IS(AX_SERVO_ID[Leg][1], AX_READ, AX_READ_PRESENT_POSITION)*0.29)*M_PI/180;
+	ANGLES.Tibia = (AX_TX_IS(AX_SERVO_ID[Leg][2], AX_READ, AX_READ_PRESENT_POSITION)*0.29+ANGLES.Femur-TIBIA_POLAR_ANGLE)*M_PI/180;
 	STARTING_POSITION.X = FEMUR_LENGTH*cos(ANGLES.Femur)+TIBIA_LENGTH*cos(ANGLES.Femur+ANGLES.Tibia);
 	STARTING_POSITION.Z = FEMUR_LENGTH*sin(ANGLES.Femur)+TIBIA_LENGTH*sin(ANGLES.Femur+ANGLES.Tibia);
 	STARTING_POSITION.Y = (STARTING_POSITION.X+COXA_LENGTH)*tan(ANGLES.Coxa);
@@ -180,61 +169,52 @@ void AX_Ping(unsigned char ID)
 	AX_TX_IS(ID, AX_PING, 0);
 }
 
-void AX_TX_I(unsigned char ID, const unsigned char Instruction, unsigned char *Params)
+void AX_TX_I(unsigned char ID, unsigned char Instruction, unsigned char *Params)
 {
 	unsigned char i, Length;
 	unsigned int Checksum, Parameters_Checksum = 0;
+	//Number of passed parameters + 2
 	Length = Params[0] + 2;
-	if(Params[0]){
-		for(i=1;i<=Params[0];i++){
-			Parameters_Checksum += Params[i];
-		}
-	}else{
-		Parameters_Checksum = 0;
+	//Do not count Params[0] as it is number of parameters passed through
+	for(i = 1; i <= Params[0]; i++){	//Calculate paramenters checksum
+		Parameters_Checksum += Params[i];
 	}
 	Checksum = (~(ID + Length + Instruction + Parameters_Checksum)) & 0xFF;
-	USART1_Mode(0);
-	TX1_Byte(255);
-	TX1_Byte(255);
-	TX1_Byte(ID);
-	TX1_Byte(Length);
-	TX1_Byte(Instruction);
-	for(i=1;i<=Params[0];i++){
-		TX1_Byte(Params[i]);
+	EUSART1_Mode(0);					//Change Mode to Transmit
+	TX1_Byte(255);						//Acnowledge byte
+	TX1_Byte(255);						//Acnowledge byte
+	TX1_Byte(ID);						//Servo ID
+	TX1_Byte(Length);					//Length of Instruction
+	TX1_Byte(Instruction);				//Type of Instruction
+	//Do not pass Params[0] as it is number of parameters passed through
+	for(i = 1; i <= Params[0]; i++){
+		TX1_Byte(Params[i]);			//Send paramenters
 	}
-	TX1_Byte(Checksum);
-	while(!TX1_STATUS);
+	TX1_Byte(Checksum);					//Send Checksum
+	while(!TX1_STATUS);					//Wait for transmit to finish
 }
 
-unsigned short int AX_TX_IS(unsigned char ID, const unsigned char Instruction, unsigned char *Params)
+unsigned short int AX_TX_IS(unsigned char ID, unsigned char Instruction, unsigned char *Params)
 {
 	AX_TX_I(ID, Instruction, Params);
-	AX_RX_Status();
-	while(ERRORS.RX){					//Error check, if true send instruction again
-		AX_TX_I(ID, Instruction, Params);
-		AX_RX_Status();
-	}
-	if(Params[2] == 2){
+	AX_RX_S();
+	if(Params[2] > 1){
 		return TX1_TCTI(RX1_Buffer[5], RX1_Buffer[6]);
 	}else{
 		return RX1_Buffer[5];
 	}
 }
 
-void AX_RX_Status(void)
+void AX_RX_S(void)
 {
 	unsigned char i, Length = 3;
-	USART1_Mode(1);
-	for(i=0;i<=Length;i++){
+	EUSART1_Mode(1);
+	for(i = 0; i <= Length; i++){
 		RX1_Buffer[i] = RX1_Byte();
 		if(i == 3){
 			Length += RX1_Buffer[3];
-		}else if(i == 4 && (RX1_Buffer[4] > 0 || RX1_Buffer[3] > 5)){
-			ERRORS.RX = 1;
-			break;
 		}
 	}
-	ERRORS.RX = 0;
 }
 
 struct AX_PARAMS AX_Read_Params(unsigned char ID)

@@ -15,7 +15,7 @@
 #include <string.h>
 #include <math.h>
 
-#include "USART.h"
+#include "Eusart.h"
 #include "Dynamixel.h"
 
 //PIC settings
@@ -30,4 +30,4 @@ void Init(void);
 //Global variables
 
 
-#endif	//CONFIG_HP
+#endif	//CONFIG_H

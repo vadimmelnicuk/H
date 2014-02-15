@@ -51,15 +51,6 @@ struct AX_PARAMS {
 };
 typedef struct AX_PARAMS AX_PARAMS;
 
-struct AX_ERRORS {
-	unsigned char RX;
-	unsigned char CANNOT_REACH;
-	unsigned char COXA_ANGLE_LIMITS;
-	unsigned char FEMUR_ANGLE_LIMITS;
-	unsigned char TIBIA_ANGLE_LIMITS;
-};
-typedef struct AX_ERRORS AX_ERRORS;
-
 /*
 The BANK SIZE is limited to hold a variable with the maximum size of 256 bytes
 The global struct of size of 324 bytes could not be initialised, because of that
@@ -73,15 +64,15 @@ void AX_Init_Leg(unsigned char);
 void AX_Flash();
 void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
 void AX_Test(void);
-void AX_Move_Leg(unsigned char, unsigned char, unsigned short int, double, double, double);
+void AX_Move_Leg(unsigned char, unsigned short int, double, double, double);
 unsigned char AX_Leg_Moving(unsigned char);
 void AX_Leg_Angles(double, double, double);
 unsigned char AX_Check_Angle_Limits();
 void AX_Starting_Position(unsigned char);
 void AX_Ping(unsigned char);
-void AX_TX_I(unsigned char, const unsigned char, unsigned char *);
-unsigned short int AX_TX_IS(unsigned char, const unsigned char, unsigned char *);
-void AX_RX_Status(void);
+void AX_TX_I(unsigned char, unsigned char, unsigned char *);
+unsigned short int AX_TX_IS(unsigned char, unsigned char, unsigned char *);
+void AX_RX_S(void);
 struct AX_PARAMS AX_Read_Params(unsigned char);
 
 //Defines
@@ -94,7 +85,7 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 
 //AX Default Settings
 #define AX_FLASH_ID 1						//Set desired ID for flashed servo
-#define AX_BAUD_RATE 3						//500 Kbps
+#define AX_BAUD_RATE 7						//250 Kbps
 #define AX_DELAY_TIME 250					//250 us
 #define AX_COXA_CW_LIMIT 207				//60 Deg
 #define AX_COXA_CCW_LIMIT 827				//240 Deg
@@ -119,8 +110,8 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 #define TIBIA_POLAR_ANGLE 225.0				//Fix the Tibia Polar Angle
 
 //Global variables
-const unsigned char AX_PING = 1;
-const unsigned char AX_READ = 2;
+unsigned char AX_PING = 1;
+unsigned char AX_READ = 2;
 unsigned char AX_READ_BAUD_RATE[] = {2,4,1};
 unsigned char AX_READ_DELAY_TIME[] = {2,5,1};
 unsigned char AX_READ_CW_LIMIT[] = {2,6,2};
@@ -138,8 +129,8 @@ unsigned char AX_READ_PRESENT_TEMPERATURE[] = {2,43,1};
 unsigned char AX_READ_MOVING[] = {2,46,1};
 unsigned char AX_READ_LOCK[] = {2,47,1};
 
-const unsigned char AX_WRITE = 3;
-const unsigned char AX_SYNC_WRITE = 131;
+unsigned char AX_WRITE = 3;
+unsigned char AX_SYNC_WRITE = 131;
 unsigned char AX_WRITE_ID[] = {2,3,1};
 unsigned char AX_WRITE_BAUD_RATE_1M[] = {2,4,1};
 unsigned char AX_WRITE_BAUD_RATE_500K[] = {2,4,3};
@@ -166,9 +157,8 @@ AX_LEG_ANGLES LEG_ANGLES = {0};
 AX_PARAMS AX_F1R = {0};
 AX_PARAMS AX_F2R = {0};
 AX_PARAMS AX_F3R = {0};
-AX_ERRORS ERRORS = {0};
 
-/* XC8 does not support designated initializers like C99 does. Use comments instead. */
+//XC8 does not support designated initializers like C99 does. Use comments instead.
 //Set it to "const" in order to store in program memory
 
 #endif	//DYNAMIXEL_H

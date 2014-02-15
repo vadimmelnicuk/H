@@ -1,5 +1,5 @@
 //--------------------------------------------------------------
-//	File:			USART.c
+//	File:			Eusart.c
 //	Author:			Vadim Melnicuk
 //	Company:		Birmingham City University
 //	Date:			11/11/2013
@@ -11,7 +11,7 @@
 
 //--------------------------------------------------------------
 
-void USART1_Mode(unsigned char Mode)
+void EUSART1_Mode(unsigned char Mode)
 {
 	switch(Mode){
 		case 0:

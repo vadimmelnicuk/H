@@ -14,8 +14,7 @@
 void Init(void)
 {
 	//FOSC
-	OSCCONbits.OSTS = 1;		//External Oscillator
-	//OSCCONbits.IRCF = 0b111;
+	OSCCONbits.IRCF = 0b111;	//16Mhz
 
 	//PORTs
 	ANCON0bits.ANSEL0 = 0;		//RA0 - Digital
@@ -30,8 +29,6 @@ void Init(void)
 	PORTA = 0;
 	PORTC = 0;
 
-	PORTCbits.RC3 = 1;
-
 	//Interrupts
 	RCONbits.IPEN = 1;
 	INTCONbits.GIEH = 1;
@@ -44,7 +41,7 @@ void Init(void)
 	//UART
 	BAUDCON1bits.BRG16 = 1;
 	BAUDCON1bits.CKTXP = 0;
-
+	
 	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE_KBPS)-1;
 
 	TXSTA1bits.BRGH = 1;
