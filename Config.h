@@ -19,13 +19,16 @@
 #include "Dynamixel.h"
 
 //PIC settings
-#pragma config XINST=OFF, FOSC=HS2, PLLCFG=ON, CANMX=PORTB
+#pragma config XINST=OFF, PLLCFG=ON, FOSC=INTIO2, CANMX=PORTB
 
 //Function prototypes
 void Init(void);
 
 //Defines
 #define _XTAL_FREQ 64000000
+
+#define PB1 PORTBbits.RB0
+#define PB2 PORTBbits.RB1
 
 //Global variables
 

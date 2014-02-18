@@ -14,19 +14,38 @@
 void Init(void)
 {
 	//FOSC
+	OSCCONbits.SCS = 0b00;		//Default primary oscillator
 	OSCCONbits.IRCF = 0b111;	//16Mhz
+	OSCTUNEbits.PLLEN = 1;		//PLL Enabled
+	OSCTUNEbits.TUN = 0b000011;	//
 
 	//PORTs
-	ANCON0bits.ANSEL0 = 0;		//RA0 - Digital
-	ANCON0bits.ANSEL1 = 0;		//RA1 - Digital
+	ANCON0bits.ANSEL0 = 0;		//AN0 - Digital
+	ANCON0bits.ANSEL1 = 0;		//AN1 - Digital
+	ANCON0bits.ANSEL2 = 0;		//AN2 - Digital
+	ANCON0bits.ANSEL3 = 0;		//AN3 - Digital
+	ANCON0bits.ANSEL4 = 0;		//AN4 - Digital
+	ANCON1bits.ANSEL8 = 0;		//AN8 - Digital
+	ANCON1bits.ANSEL9 = 0;		//AN9 - Digital
+	ANCON1bits.ANSEL10 = 0;		//AN10 - Digital
 
 	TRISAbits.TRISA0 = 0;		//RA0 - Output
 	TRISAbits.TRISA1 = 0;		//RA1 - Output
+	TRISAbits.TRISA2 = 0;		//RA2 - Output
+	TRISAbits.TRISA3 = 0;		//RA3 - Output
+	TRISAbits.TRISA5 = 0;		//RA5 - Output
+	TRISAbits.TRISA6 = 0;		//RA6 - Output
+
+	TRISBbits.TRISB0 = 1;		//RB0 - Input
+	TRISBbits.TRISB1 = 1;		//RB1 - Input
+	TRISBbits.TRISB4 = 0;		//RB4 - Output
+	TRISBbits.TRISB5 = 0;		//RB5 - Output
+
 	TRISCbits.TRISC3 = 0;		//RC3 - Output
 	TRISCbits.TRISC6 = 1;		//RC6 - Input
 	TRISCbits.TRISC7 = 1;		//RC7 - Input
 
-	PORTA = 0;
+	PORTA = 0b11111111;			//All LEDs ON
 	PORTC = 0;
 
 	//Interrupts
@@ -53,3 +72,4 @@ void Init(void)
 	RCSTA1bits.RX9 = 0;
 	RCSTA1bits.SPEN = 1;
 }
+

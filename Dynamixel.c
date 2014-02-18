@@ -19,10 +19,8 @@ void AX_Init(void)
 
 	AX_Init_Leg(1);
 
-	//AX_Move_Leg(1, 50, 100, 0, -50);
-
 	while(1){
-		//AX_Test();
+		AX_Test();
 	}
 }
 
@@ -55,9 +53,13 @@ void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int 
 
 void AX_Test(void)
 {
-	AX_Move_Leg(1, 50, 150, -100, -100);			//Leg, Steps, Speed, Coxa, Femur, Tibia
+	AX_Move_Leg(1, 100, 150, -100, -100);			//Leg, Steps, Speed, Coxa, Femur, Tibia
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
-	AX_Move_Leg(1, 50, 150, 100, -100);
+	AX_Move_Leg(1, 100, 150, 0, -20);
+	while(AX_Leg_Moving(1)){__delay_ms(10);}
+	AX_Move_Leg(1, 100, 150, 100, -100);
+	while(AX_Leg_Moving(1)){__delay_ms(10);}
+	AX_Move_Leg(1, 100, 150, 0, -20);
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
 }
 
@@ -66,7 +68,7 @@ void AX_Move_Leg(unsigned char Leg, unsigned short int Speed, double X, double Y
 	Leg -= 1;										//Convert to leg array number
 	AX_Leg_Angles(X, Y, Z);
 	if(LEG_ANGLES.Coxa == 0 && LEG_ANGLES.Femur == 0 && LEG_ANGLES.Tibia == 0){
-		
+		//Error handler will be here
 	}else{
 		if(AX_Check_Angle_Limits()){
 			SpeedL = Speed & 0xFF;
@@ -87,7 +89,6 @@ void AX_Move_Leg(unsigned char Leg, unsigned short int Speed, double X, double Y
 			AX_WRITE_LEG_GOAL_POSITION[16] = SpeedL;						//Tibia Speed Low Byte
 			AX_WRITE_LEG_GOAL_POSITION[17] = SpeedH;						//Tibia Speed High Byte
 			AX_TX_I(254, AX_SYNC_WRITE, AX_WRITE_LEG_GOAL_POSITION);
-			while(AX_Leg_Moving(Leg)){__delay_ms(10);}
 		}
 	}
 }
@@ -142,13 +143,16 @@ void AX_Leg_Angles(double X, double Y, double Z)
 unsigned char AX_Check_Angle_Limits()
 {
 	if(LEG_ANGLES.Coxa < AX_COXA_CW_LIMIT || LEG_ANGLES.Coxa > AX_COXA_CCW_LIMIT){
-		return 1;
-	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
-		return 1;
-	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
-		return 1;
-	}else{
+		//Error handler will be here
 		return 0;
+	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
+		//Error handler will be here
+		return 0;
+	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
+		//Error handler will be here
+		return 0;
+	}else{
+		return 1;
 	}
 }
 

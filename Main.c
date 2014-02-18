@@ -13,8 +13,9 @@
 
 void main(void)
 {
-	Init();
-	
+	Init();							//Initialise Microcontroller
+	__delay_ms(5);
+
 	#ifdef MODE_DEV
 		AX_Init();
 	#endif
@@ -23,6 +24,6 @@ void main(void)
 	#endif
 	
 	while(1){
-		
+		PORTAbits.RA0 = ~PORTAbits.RA0;
 	}
 }
