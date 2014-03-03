@@ -23,12 +23,24 @@
 
 //Function prototypes
 void Init(void);
+void Wait_PB1(void);
+void Wait_PB2(void);
+void Delay(unsigned short int);
 
 //Defines
 #define _XTAL_FREQ 64000000
 
-#define PB1 PORTBbits.RB0
-#define PB2 PORTBbits.RB1
+#define LED1 LATAbits.LATA0
+#define LED2 LATAbits.LATA1
+#define LED3 LATAbits.LATA2
+#define LED4 LATAbits.LATA3
+#define LED5 LATAbits.LATA7
+#define LED6 LATAbits.LATA6
+
+#define PB1 LATBbits.LATB0
+#define PB2 LATBbits.LATB1
+
+#define RESET_LEGS LATCbits.LATC5
 
 //Global variables
 

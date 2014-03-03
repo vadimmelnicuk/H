@@ -53,13 +53,13 @@ void AX_Go_To(unsigned char ID, unsigned short int Position, unsigned short int 
 
 void AX_Test(void)
 {
-	AX_Move_Leg(1, 100, 150, -100, -100);			//Leg, Steps, Speed, Coxa, Femur, Tibia
+	AX_Move_Leg(1, 60, 150, -100, -100);			//Leg, Steps, Speed, Coxa, Femur, Tibia
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
-	AX_Move_Leg(1, 100, 150, 0, -20);
+	AX_Move_Leg(1, 60, 150, 0, -20);
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
-	AX_Move_Leg(1, 100, 150, 100, -100);
+	AX_Move_Leg(1, 60, 150, 100, -100);
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
-	AX_Move_Leg(1, 100, 150, 0, -20);
+	AX_Move_Leg(1, 60, 150, 0, -20);
 	while(AX_Leg_Moving(1)){__delay_ms(10);}
 }
 
