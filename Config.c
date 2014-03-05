@@ -17,7 +17,7 @@ void Init(void)
 	OSCCONbits.SCS = 0b00;		//Default primary oscillator
 	OSCCONbits.IRCF = 0b111;	//16Mhz
 	OSCTUNEbits.PLLEN = 1;		//PLL Enabled
-	OSCTUNEbits.TUN = 0b000011;	//Tune the oscillator
+	OSCTUNEbits.TUN = 0b000011;	//Tune the internal oscillator
 
 	//PORTs
 	ANCON0bits.ANSEL0 = 0;		//AN0 - Digital
@@ -39,6 +39,8 @@ void Init(void)
 
 	TRISBbits.TRISB0 = 1;		//RB0 - Input
 	TRISBbits.TRISB1 = 1;		//RB1 - Input
+	TRISBbits.TRISB2 = 0;		//RB2 - Output
+	TRISBbits.TRISB3 = 1;		//RB3 - Input
 	TRISBbits.TRISB4 = 0;		//RB4 - Output
 	TRISBbits.TRISB5 = 0;		//RB5 - Output
 
@@ -68,7 +70,7 @@ void Init(void)
 	BAUDCON1bits.BRG16 = 1;
 	BAUDCON1bits.CKTXP = 0;
 	
-	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE_KBPS)-1;
+	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE_KBPS)-1;		//Calculate BAUDRATE register value for AX Servo comms
 
 	TXSTA1bits.BRGH = 1;
 	TXSTA1bits.SYNC = 0;
@@ -78,6 +80,13 @@ void Init(void)
 	RCSTA1bits.CREN = 0;
 	RCSTA1bits.RX9 = 0;
 	RCSTA1bits.SPEN = 1;
+
+	//ECAN
+	CANCONbits.REQOP = 0b100;	//Request configuration mode
+	CANSTATbits.OPMODE = 0b100;	//Sets configuration mode
+	Delay(1);					//Wait for configuration mode
+
+	
 }
 
 void Wait_PB1(void)

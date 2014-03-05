@@ -143,13 +143,13 @@ void AX_Leg_Angles(double X, double Y, double Z)
 unsigned char AX_Check_Angle_Limits()
 {
 	if(LEG_ANGLES.Coxa < AX_COXA_CW_LIMIT || LEG_ANGLES.Coxa > AX_COXA_CCW_LIMIT){
-		//Error handler will be here
+		//TODO - Error handler will be here
 		return 0;
 	}else if(LEG_ANGLES.Femur < AX_FEMUR_CW_LIMIT || LEG_ANGLES.Femur > AX_FEMUR_CCW_LIMIT){
-		//Error handler will be here
+		//TODO - Error handler will be here
 		return 0;
 	}else if(LEG_ANGLES.Tibia < AX_TIBIA_CW_LIMIT || LEG_ANGLES.Tibia > AX_TIBIA_CCW_LIMIT){
-		//Error handler will be here
+		//TODO - Error handler will be here
 		return 0;
 	}else{
 		return 1;

@@ -27,7 +27,7 @@ void main(void)
 
 	while(1){
 		LED1 = 1;
-		Delay(50);
+		Delay(50);					//TODO Test - change LED timings
 		LED1 = 0;
 		LED2 = 1;
 		Delay(50);

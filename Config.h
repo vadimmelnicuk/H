@@ -17,6 +17,7 @@
 #include <math.h>
 
 #include "Eusart.h"
+#include "Ecan.h"
 #include "Dynamixel.h"
 
 //PIC settings
