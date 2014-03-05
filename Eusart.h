@@ -11,6 +11,7 @@
 
 //Function prototypes
 void EUSART1_Mode(unsigned char);
+void EUSART1_Test(void);
 void TX1_Byte(unsigned char);
 unsigned char RX1_Byte(void);
 unsigned short int TX1_TCTI(unsigned char, unsigned char);
@@ -19,12 +20,12 @@ unsigned short int TX1_TCTI(unsigned char, unsigned char);
 #define EUART_BAUDRATE 115200
 
 #define TX1_EN TXSTA1bits.TXEN
-#define TX1_EN_PORT PORTBbits.RB5
+#define TX1_EN_PORT LATBbits.LATB5
 #define TX1_FLAG PIR1bits.TX1IF
 #define TX1_STATUS TXSTA1bits.TRMT
 #define TX1_REG TXREG1
 #define RX1_EN RCSTA1bits.CREN
-#define RX1_EN_PORT PORTBbits.RB4
+#define RX1_EN_PORT LATBbits.LATB4
 #define RX1_FLAG PIR1bits.RC1IF
 #define RX1_REG RCREG1
 

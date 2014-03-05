@@ -35,6 +35,15 @@ void EUSART1_Mode(unsigned char Mode)
 	}
 }
 
+void EUSART1_Test(void)
+{
+	while(1){
+		EUSART1_Mode(0);
+		TX1_Byte(rand()%255);				//Send random Byte
+		while(!TX1_STATUS);					//Wait for transmit to finish
+	}
+}
+
 void TX1_Byte(unsigned char Byte)
 {
 	while(!TX1_FLAG);

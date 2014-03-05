@@ -12,6 +12,7 @@
 //Header files
 #include <xc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <math.h>
 
@@ -19,7 +20,7 @@
 #include "Dynamixel.h"
 
 //PIC settings
-#pragma config XINST=OFF, PLLCFG=ON, FOSC=INTIO2, CANMX=PORTB
+#pragma config XINST=OFF, PLLCFG=ON, FOSC=INTIO1, CANMX=PORTB
 
 //Function prototypes
 void Init(void);

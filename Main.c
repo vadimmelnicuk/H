@@ -19,7 +19,7 @@ void main(void)
 	RESET_LEGS = 1;					//Take Legs out of reset
 
 	#ifdef MODE_DEV
-		//AX_Init();
+		AX_Init();
 	#endif
 	#ifdef MODE_FLASH
 		AX_Flash();
