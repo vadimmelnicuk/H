@@ -10,6 +10,8 @@
 #define	ECAN_H
 
 //Function prototypes
+void ECAN_TX(unsigned char);
+void ECAN_RX(void);
 
 //Defines
 #define ECAN_BAUDRATE 115200

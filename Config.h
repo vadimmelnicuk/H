@@ -21,12 +21,13 @@
 #include "Dynamixel.h"
 
 //PIC settings
-#pragma config XINST=OFF, PLLCFG=ON, FOSC=INTIO1, CANMX=PORTB
+#pragma config XINST=OFF, PLLCFG=ON, FOSC=INTIO2, CANMX=PORTB
 
 //Function prototypes
 void Init(void);
 void Wait_PB1(void);
 void Wait_PB2(void);
+void Blink_LEDS(void);
 void Delay(unsigned short int);
 
 //Defines

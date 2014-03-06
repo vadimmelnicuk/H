@@ -83,10 +83,28 @@ void Init(void)
 
 	//ECAN
 	CANCONbits.REQOP = 0b100;	//Request configuration mode
-	CANSTATbits.OPMODE = 0b100;	//Sets configuration mode
-	Delay(1);					//Wait for configuration mode
+	while(CANSTATbits.OPMODE != 4);	//Wait for configuration mode
+	ECANCONbits.MDSEL = 0b00;	//Legacy mode (Mode 0, default)
 
-	
+	BRGCON1bits.BRP = 0b111111;	//TQ = (2 x 64)/FOSC
+	BRGCON1bits.SJW = 0b11;		//Synchronization jump width time = 4 x TQ
+	//Normally a large SJW is only necessary when the clock generation of the
+	//different nodes is inaccurate or unstable, such as using ceramic resonators.
+	BRGCON2bits.PRSEG = 0b001;	//Propagation time = 2 x TQ
+	BRGCON2bits.SEG1PH = 0b110;	//Phase Segment 1 time = 7 x TQ
+	BRGCON2bits.SAM = 0;		//Bus line is sampled once at the sample point
+	BRGCON2bits.SEG2PHTS = 1;	//Phase Segment 2 - Freely programmable
+	BRGCON3bits.SEG2PH = 0b101;	//Phase Segment 2 time = 6 x TQ
+	BRGCON3bits.WAKFIL = 0;		//CAN bus line filter is not used for wake-up
+	BRGCON3bits.WAKDIS = 0;		//Enable CAN bus activity wake-up feature
+
+	RXB0CONbits.RXM0 = 1;		//Receive all messages (including those with errors); filter criteria is ignored
+	RXB0CONbits.RXM1 = 1;
+	RXB1CONbits.RXM0 = 1;		//Receive all messages (including those with errors); filter criteria is ignored
+	RXB1CONbits.RXM1 = 1;
+
+	CANCONbits.REQOP = 0b000;	//Request normal mode
+	while(CANSTATbits.OPMODE != 0);	//Wait for normal mode
 }
 
 void Wait_PB1(void)
@@ -97,6 +115,28 @@ void Wait_PB1(void)
 void Wait_PB2(void)
 {
 
+}
+
+void Blink_LEDS(void)
+{
+	LED1 = 1;
+	Delay(50);					//TODO Test - change LED timings
+	LED1 = 0;
+	LED2 = 1;
+	Delay(50);
+	LED2 = 0;
+	LED3 = 1;
+	Delay(50);
+	LED3 = 0;
+	LED4 = 1;
+	Delay(50);
+	LED4 = 0;
+	LED5 = 1;
+	Delay(50);
+	LED5 = 0;
+	LED6 = 1;
+	Delay(50);
+	LED6 = 0;
 }
 
 void Delay(unsigned short int t)
