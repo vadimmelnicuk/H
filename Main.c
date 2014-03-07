@@ -22,6 +22,7 @@ void main(void)
 		//AX_Init();
 		while(1){
 			ECAN_TX(rand()%255);
+			//ECAN_RX();
 		}
 	#endif
 	#ifdef MODE_FLASH
