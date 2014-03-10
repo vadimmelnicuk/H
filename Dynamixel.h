@@ -24,9 +24,9 @@ struct POINT_3D {
 typedef struct POINT_3D POINT_3D;
 
 struct AX_LEG_ANGLES {
-	double Coxa;
-	double Femur;
-	double Tibia;
+	double COXA;
+	double FEMUR;
+	double TIBIA;
 };
 typedef struct AX_LEG_ANGLES AX_LEG_ANGLES;
 
@@ -51,6 +51,16 @@ struct AX_PARAMS {
 };
 typedef struct AX_PARAMS AX_PARAMS;
 
+struct AX_LEG {
+	unsigned char ID;
+	AX_PARAMS COXA;
+	AX_PARAMS FEMUR;
+	AX_PARAMS TIBIA;
+	AX_LEG_ANGLES TARGET_ANGLES;
+	AX_LEG_ANGLES POLAR_ANGLES;
+};
+typedef struct AX_LEG AX_LEG;
+
 /*
 The BANK SIZE is limited to hold a variable with the maximum size of 256 bytes
 The global struct of size of 324 bytes could not be initialised, because of that
@@ -60,23 +70,24 @@ representing whole Hexapod.
 
 //Function prototypes
 void AX_Init(void);
-void AX_Init_Leg(unsigned char);
+void AX_Init_Leg();
 void AX_Flash();
+unsigned char AX_Ping(unsigned char);
 void AX_Go_To(unsigned char, unsigned short int, unsigned short int);
 void AX_Test(void);
-void AX_Move_Leg(unsigned char, unsigned short int, double, double, double);
+void AX_Move_Leg(unsigned short int, double, double, double);
 unsigned char AX_Leg_Moving(unsigned char);
 void AX_Leg_Angles(double, double, double);
 unsigned char AX_Check_Angle_Limits();
-void AX_Starting_Position(unsigned char);
-void AX_Ping(unsigned char);
+void AX_Starting_Position();
 void AX_TX_I(unsigned char, unsigned char, unsigned char *);
 unsigned short int AX_TX_IS(unsigned char, unsigned char, unsigned char *);
 void AX_RX_S(void);
 struct AX_PARAMS AX_Read_Params(unsigned char);
+void AxFindLeg(void);
 
 //Defines
-#ifdef MODE_DEV
+#if defined(MODE_LEG) | defined(MODE_CON)
 	#define AX_BAUD_RATE_KBPS 500000		//500 Kbps
 #endif
 #ifdef MODE_FLASH
@@ -85,7 +96,7 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 
 //AX Default Settings
 #define AX_FLASH_ID 1						//Set desired ID for flashed servo
-#define AX_BAUD_RATE 7						//250 Kbps
+#define AX_BAUD_RATE 3						//500 Kbps
 #define AX_DELAY_TIME 250					//250 us
 #define AX_COXA_CW_LIMIT 207				//60 Deg
 #define AX_COXA_CCW_LIMIT 827				//240 Deg
@@ -97,20 +108,20 @@ struct AX_PARAMS AX_Read_Params(unsigned char);
 #define AX_LOWEST_LIMIT_VOLTAGE 60			//6 V
 #define AX_HIGHEST_LIMIT_VOLTAGE 140		//14 V
 #define AX_MAX_TORQUE 1023					//100 %
-#define AX_STATUS_RETURN_LEVEL 1			//
-#define AX_LOCK 0							//
-#define AX_COXA_HOME_POSITION 512			//150 Deg
-#define AX_FEMUR_HOME_POSITION 470			//140 Deg
-#define AX_TIBIA_HOME_POSITION 240			//90 Deg
-#define COXA_LENGTH 43.0					//Coxa->Femur (mm)
-#define FEMUR_LENGTH 120.0					//Femur->Tibia (mm)
-#define TIBIA_LENGTH 166.0					//Tibia->End of foot (mm)
-#define COXA_POLAR_ANGLE 150.0				//
-#define FEMUR_POLAR_ANGLE 255.0				//Fix the Femur Polar Angle since the part is bended
-#define TIBIA_POLAR_ANGLE 225.0				//Fix the Tibia Polar Angle
+#define AX_STATUS_RETURN_LEVEL 1			//Return only for the READ command
+#define AX_LOCK 0							//EEPROM area can be modified
+
+#define COXA_LENGTH 43.0					//Coxa->Femur mm
+#define FEMUR_LENGTH 120.0					//Femur->Tibia mm
+#define TIBIA_LENGTH 166.0					//Tibia->End of foot mm
+
+#define COXA_HOME_POSITION 512				//150 Deg
+#define FEMUR_HOME_POSITION 470				//140 Deg
+#define TIBIA_HOME_POSITION 240				//90 Deg
 
 //Global variables
 unsigned char AX_PING = 1;
+unsigned char AX_READ_PING[] = {0};
 unsigned char AX_READ = 2;
 unsigned char AX_READ_BAUD_RATE[] = {2,4,1};
 unsigned char AX_READ_DELAY_TIME[] = {2,5,1};
@@ -153,10 +164,7 @@ unsigned char AX_SERVO_ID[6][3] = {{1,2,3},{4,5,6},{7,8,9},{10,11,12},{13,14,15}
 
 //Declare structs in .h in order to make them global
 POINT_3D STARTING_POSITION = {0};
-AX_LEG_ANGLES LEG_ANGLES = {0};
-AX_PARAMS AX_F1R = {0};
-AX_PARAMS AX_F2R = {0};
-AX_PARAMS AX_F3R = {0};
+AX_LEG LEG = {0};
 
 //XC8 does not support designated initializers like C99 does. Use comments instead.
 //Set it to "const" in order to store in program memory

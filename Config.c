@@ -107,17 +107,33 @@ void Init(void)
 	while(CANSTATbits.OPMODE != 0);	//Wait for normal mode
 }
 
-void Wait_PB1(void)
+void PB1_Wait(void)
 {
-	
+	while(!PB1){
+		if(PB1){
+			while(PB1);
+			Delay(10);
+			break;
+		}
+	}
 }
 
-void Wait_PB2(void)
+void PB2_Wait(void)
 {
 
 }
 
-void Blink_LEDS(void)
+void LEDS_On(void)
+{
+	LED1 = 1;
+	LED2 = 1;
+	LED3 = 1;
+	LED4 = 1;
+	LED5 = 1;
+	LED6 = 1;
+}
+
+void LEDS_Blink(void)
 {
 	LED1 = 1;
 	Delay(50);					//TODO Test - change LED timings

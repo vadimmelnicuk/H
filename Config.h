@@ -25,9 +25,10 @@
 
 //Function prototypes
 void Init(void);
-void Wait_PB1(void);
-void Wait_PB2(void);
-void Blink_LEDS(void);
+void PB1_Wait(void);
+void PB2_Wait(void);
+void LEDS_On(void);
+void LEDS_Blink(void);
 void Delay(unsigned short int);
 
 //Defines
@@ -40,8 +41,8 @@ void Delay(unsigned short int);
 #define LED5 LATAbits.LATA7
 #define LED6 LATAbits.LATA6
 
-#define PB1 LATBbits.LATB0
-#define PB2 LATBbits.LATB1
+#define PB1 PORTBbits.RB0
+#define PB2 PORTBbits.RB1
 
 #define RESET_LEGS LATCbits.LATC5
 

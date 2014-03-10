@@ -56,6 +56,21 @@ unsigned char RX1_Byte(void)
 	return RX1_REG;
 }
 
+unsigned char Rx1ByteTimeOut(void)
+{
+	unsigned short int i = 0;
+	while(!RX1_FLAG){
+		__delay_us(1);
+		i++;
+		if(i == 1000){
+			RX1_Error = 1;
+			return 0;
+		}
+	}
+	RX1_Error = 0;
+	return RX1_REG;
+}
+
 unsigned short int TX1_TCTI(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
 {
 	unsigned short int i;

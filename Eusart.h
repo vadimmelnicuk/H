@@ -14,6 +14,7 @@ void EUSART1_Mode(unsigned char);
 void EUSART1_Test(void);
 void TX1_Byte(unsigned char);
 unsigned char RX1_Byte(void);
+unsigned char Rx1ByteTimeOut(void);
 unsigned short int TX1_TCTI(unsigned char, unsigned char);
 
 //Defines
@@ -31,5 +32,6 @@ unsigned short int TX1_TCTI(unsigned char, unsigned char);
 
 //Global variables
 unsigned char RX1_Buffer[10] = {0};
+unsigned char RX1_Error = 0;
 
 #endif	//EUSART_H
