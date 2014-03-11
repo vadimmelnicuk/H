@@ -11,9 +11,9 @@
 
 //--------------------------------------------------------------
 
-void EUSART1_Mode(unsigned char Mode)
+void Eusart1Mode(unsigned char mode)
 {
-	switch(Mode){
+	switch(mode){
 		case 0:
 			RX1_EN_PORT = 0;
 			RX1_EN = 0;
@@ -35,22 +35,29 @@ void EUSART1_Mode(unsigned char Mode)
 	}
 }
 
-void EUSART1_Test(void)
+void Eusart1Test(void)
 {
 	while(1){
-		EUSART1_Mode(0);
-		TX1_Byte(rand()%255);				//Send random Byte
+		Eusart1Mode(0);
+		Tx1Byte(rand()%255);				//Send random Byte
 		while(!TX1_STATUS);					//Wait for transmit to finish
 	}
 }
 
-void TX1_Byte(unsigned char Byte)
+void Tx1Byte(unsigned char byte)
 {
 	while(!TX1_FLAG);
-	TX1_REG = Byte;
+	TX1_REG = byte;
 }
 
-unsigned char RX1_Byte(void)
+unsigned short int Tx1Tcti(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
+{
+	unsigned short int i;
+	i = (c2 << 8) | c1;
+	return i;
+}
+
+unsigned char Rx1Byte(void)
 {
 	while(!RX1_FLAG);
 	return RX1_REG;
@@ -58,22 +65,15 @@ unsigned char RX1_Byte(void)
 
 unsigned char Rx1ByteTimeOut(void)
 {
-	unsigned short int i = 0;
+	unsigned short int n = 0;
 	while(!RX1_FLAG){
-		__delay_us(1);
-		i++;
-		if(i == 1000){
-			RX1_Error = 1;
+		__delay_us(1);						//Delay 1 us
+		n++;
+		if(n == 1000){
+			rx1_error = 1;
 			return 0;
 		}
 	}
-	RX1_Error = 0;
+	rx1_error = 0;
 	return RX1_REG;
-}
-
-unsigned short int TX1_TCTI(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
-{
-	unsigned short int i;
-	i = (c2 << 8) | c1;
-	return i;
 }

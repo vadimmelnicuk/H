@@ -25,10 +25,11 @@
 
 //Function prototypes
 void Init(void);
-void PB1_Wait(void);
-void PB2_Wait(void);
-void LEDS_On(void);
-void LEDS_Blink(void);
+void Pb1Wait(void);
+void Pb2Wait(void);
+void LedsOn(void);
+void LedsOff(void);
+void LedsBlink(void);
 void Delay(unsigned short int);
 
 //Defines

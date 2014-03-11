@@ -10,12 +10,13 @@
 #define	EUSART_H
 
 //Function prototypes
-void EUSART1_Mode(unsigned char);
-void EUSART1_Test(void);
-void TX1_Byte(unsigned char);
-unsigned char RX1_Byte(void);
+void Eusart1Mode(unsigned char);
+void Eusart1Test(void);
+void Tx1Byte(unsigned char);
+unsigned short int Tx1Tcti(unsigned char, unsigned char);
+unsigned char Rx1Byte(void);
 unsigned char Rx1ByteTimeOut(void);
-unsigned short int TX1_TCTI(unsigned char, unsigned char);
+
 
 //Defines
 #define EUART_BAUDRATE 115200
@@ -31,7 +32,7 @@ unsigned short int TX1_TCTI(unsigned char, unsigned char);
 #define RX1_REG RCREG1
 
 //Global variables
-unsigned char RX1_Buffer[10] = {0};
-unsigned char RX1_Error = 0;
+unsigned char rx1_buffer[10] = {0};
+unsigned char rx1_error = 0;
 
 #endif	//EUSART_H

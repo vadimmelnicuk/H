@@ -11,7 +11,7 @@
 
 //--------------------------------------------------------------
 
-void ECAN_TX(unsigned char Byte)
+void EcanTx(unsigned char byte)
 {
 	TXB0CONbits.TXPRI = 3;					//Priority Level 3 (highest priority) (0-3)
 	TXB0DLCbits.DLC = 8;					//Set number of bytes (0-8)
@@ -31,17 +31,16 @@ void ECAN_TX(unsigned char Byte)
  	while(TXB0CONbits.TXREQ);				//Wait for transmit to finish
 }
 
-void ECAN_RX(void)
+void EcanRx(void)
 {
-	unsigned char i;
 	if(RXB0CONbits.RXFUL){					//Does RXB0 contain a message?
 		if(RXB0SIDLbits.EXID){				//Is this Extended Identifier?
 			
 		}else{
 			if(RXB0DLCbits.DLC > 0){		//Any bytes to read?
-				//i = RXB0D0;
+				
 			}
 		}
-		//RXB0CONbits.RXFUL = 0;				//Receiving is completed
+		RXB0CONbits.RXFUL = 0;				//Receiving is completed
 	}
 }

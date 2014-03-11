@@ -19,8 +19,8 @@ void main(void)
 	#ifdef MODE_CON
 		RESET_LEGS = 1;				//Take Legs out of reset
 		while(1){
-			PB1_Wait();
-			ECAN_TX(rand()%255);
+			Pb1Wait();
+			EcanTx(rand()%255);
 			LED1 = 1;
 			Delay(1000);
 			LED1 = 0;
@@ -28,11 +28,11 @@ void main(void)
 	#endif
 	#ifdef MODE_LEG
 		AX_Init();
-		//ECAN_RX();
+		//EcanRx();
 	#endif
 	#ifdef MODE_FLASH
 		AX_Flash();					//Flash a servo with desired settings
-		LEDS_On();					//Let me know if everything is OK
+		LedsOn();					//Let me know if everything is OK
 		while(1);
 	#endif
 }

@@ -11,7 +11,7 @@
 
 //--------------------------------------------------------------
 
-void interrupt High_interrupt(void)
+void interrupt HighInterrupt(void)
 {
 	
 }
