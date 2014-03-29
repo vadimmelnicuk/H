@@ -33,6 +33,6 @@ unsigned char Rx1ByteTimeOut(void);
 
 //Global variables
 unsigned char rx1_buffer[10] = {0};
-unsigned char rx1_error = 0;
+unsigned char rx1_timeout = 0;
 
 #endif	//EUSART_H

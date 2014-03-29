@@ -70,10 +70,10 @@ unsigned char Rx1ByteTimeOut(void)
 		__delay_us(1);						//Delay 1 us
 		n++;
 		if(n == 1000){
-			rx1_error = 1;
+			rx1_timeout = 1;
 			return 0;
 		}
 	}
-	rx1_error = 0;
+	rx1_timeout = 0;
 	return RX1_REG;
 }

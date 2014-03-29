@@ -57,7 +57,6 @@ struct AX_LEG {
 	AX_PARAMS FEMUR;
 	AX_PARAMS TIBIA;
 	AX_LEG_ANGLES TARGET_ANGLES;
-	AX_LEG_ANGLES POLAR_ANGLES;
 	POINT_3D STARTING_POSITION;
 };
 typedef struct AX_LEG AX_LEG;
@@ -77,7 +76,7 @@ unsigned char AxPing(unsigned char);
 void AxGoTo(unsigned char, unsigned short int, unsigned short int);
 void AxTest(void);
 void AxMoveLeg(unsigned short int, double, double, double);
-unsigned char AxLegMoving();
+void AxLegMoving(void);
 void AxLegAngles(double, double, double);
 unsigned char AxCheckAngleLimits();
 void AxStartingPosition();
@@ -86,6 +85,7 @@ unsigned short int AxTxIS(unsigned char, unsigned char, unsigned char *);
 void AxRxS(void);
 struct AX_PARAMS AxReadParams(unsigned char);
 void AxFindLeg(void);
+void ResetLegs(void);
 
 //Defines
 #if defined(MODE_LEG) | defined(MODE_CON)
@@ -116,9 +116,13 @@ void AxFindLeg(void);
 #define FEMUR_LENGTH 120.0					//Femur->Tibia mm
 #define TIBIA_LENGTH 166.0					//Tibia->End of foot mm
 
-#define COXA_HOME_POSITION 512				//150 Deg
-#define FEMUR_HOME_POSITION 470				//140 Deg
-#define TIBIA_HOME_POSITION 240				//90 Deg
+#define COXA_POLAR_ANGLE 150.0				//Deg
+#define FEMUR_POLAR_ANGLE 255.0				//Deg
+#define TIBIA_POLAR_ANGLE 225.0				//Deg
+
+#define HOME_POSITION_X 80.0				//
+#define HOME_POSITION_Y 0					//
+#define HOME_POSITION_Z 0					//
 
 //Global variables
 unsigned char ax_ping = 1;

@@ -10,14 +10,15 @@
 #define	ECAN_H
 
 //Function prototypes
-void EcanTx(unsigned char);
-void EcanRx(void);
+void EcanTx(unsigned char, unsigned char);
+unsigned char EcanTxPing(unsigned char);
+void EcanRx(unsigned char);
 
 //Defines
-#define ECAN_BAUDRATE 115200
-
-//Global variables
 #define CANTX PORTBbits.RB2
 #define CANRX PORTBbits.RB3
+
+//Global variables
+
 
 #endif	//ECAN_H

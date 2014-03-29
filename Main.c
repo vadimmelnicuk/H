@@ -14,21 +14,26 @@
 void main(void)
 {
 	Init();							//Initialise Microcontroller
-	Delay(10);						//Delay 10ms
+	Delay(100);						//Delay 100ms
 
 	#ifdef MODE_CON
-		RESET_LEGS = 1;				//Take Legs out of reset
-		while(1){
-			Pb1Wait();
-			EcanTx(rand()%255);
-			LED1 = 1;
-			Delay(1000);
-			LED1 = 0;
+		ResetLegs();
+		Pb1Wait();
+		if(EcanTxPing(5)){			//Ping Servo
+			LED6 = 1;
 		}
+		if(EcanTxPing(4)){
+			LED5 = 1;
+		}
+		while(1);
 	#endif
 	#ifdef MODE_LEG
-		AX_Init();
-		//EcanRx();
+		AxInit();
+		while(1){
+			//EcanRx(LEG.ID);
+			AxTest();
+			Delay(10);
+		}
 	#endif
 	#ifdef MODE_FLASH
 		AX_Flash();					//Flash a servo with desired settings

@@ -15,8 +15,6 @@ void AxInit(void)
 {
 	AxFindLeg();
 	AxInitLeg();
-	AxMoveLeg(50, 100, 50, 50);
-	while(1);
 }
 
 void AxInitLeg()
@@ -25,21 +23,7 @@ void AxInitLeg()
 	LEG.FEMUR = AxReadParams(ax_servo_ids[LEG.ID][1]);
 	LEG.TIBIA = AxReadParams(ax_servo_ids[LEG.ID][2]);
 
-	if(LEG.ID > 2){
-		//Polar Angles for left side legs
-		LEG.POLAR_ANGLES.COXA = 150;
-		LEG.POLAR_ANGLES.FEMUR = 45;
-		LEG.POLAR_ANGLES.TIBIA = 75;
-	}else{
-		//Polar Angles for right side legs
-		LEG.POLAR_ANGLES.COXA = 150;
-		LEG.POLAR_ANGLES.FEMUR = 255;
-		LEG.POLAR_ANGLES.TIBIA = 225;
-	}
-
-	AxGoTo(ax_servo_ids[LEG.ID][0], COXA_HOME_POSITION, 100);
-	AxGoTo(ax_servo_ids[LEG.ID][1], FEMUR_HOME_POSITION, 100);
-	AxGoTo(ax_servo_ids[LEG.ID][2], TIBIA_HOME_POSITION, 100);
+	AxMoveLeg(50, HOME_POSITION_X, HOME_POSITION_Y, HOME_POSITION_Z);
 }
 
 void AxFlash()
@@ -60,7 +44,7 @@ unsigned char AxPing(unsigned char id)
 	Eusart1Mode(1);
 	for(n = 0; n <= length; n++){
 		rx1_buffer[n] = Rx1ByteTimeOut();
-		if(rx1_error){
+		if(rx1_timeout){
 			return 0;
 		}
 		if(n == 3){
@@ -81,14 +65,14 @@ void AxGoTo(unsigned char id, unsigned short int position, unsigned short int sp
 
 void AxTest(void)
 {
-	AxMoveLeg(60, 150, -100, -100);					//Speed, Coxa, Femur, Tibia
-	while(AxLegMoving()){__delay_ms(10);}
-	AxMoveLeg(60, 150, 0, -20);
-	while(AxLegMoving()){__delay_ms(10);}
-	AxMoveLeg(60, 150, 100, -100);
-	while(AxLegMoving()){__delay_ms(10);}
-	AxMoveLeg(60, 150, 0, -20);
-	while(AxLegMoving()){__delay_ms(10);}
+	AxMoveLeg(60, 100, 0, -50);					//Speed, Coxa, Femur, Tibia
+	AxLegMoving();
+	AxMoveLeg(60, 100, 20, 0);
+	AxLegMoving();
+	AxMoveLeg(60, 100, 0, 50);
+	AxLegMoving();
+	AxMoveLeg(60, 100, 20, 0);
+	AxLegMoving();
 }
 
 void AxMoveLeg(unsigned short int speed, double x, double y, double z){
@@ -120,22 +104,26 @@ void AxMoveLeg(unsigned short int speed, double x, double y, double z){
 	}
 }
 
-unsigned char AxLegMoving()
+void AxLegMoving(void)
 {
 	unsigned char n;
-	for(n = 0; n <= 2; n++){
-		if(AxTxIS(ax_servo_ids[LEG.ID][n], ax_read, ax_read_moving)){
-			return 1;
+	unsigned char c = 1;
+	while(c){
+		c = 0;
+		for(n = 0; n <= 2; n++){
+			if(AxTxIS(ax_servo_ids[LEG.ID][n], ax_read, ax_read_moving)){
+				c = 1;
+			}
 		}
+		Delay(10);
 	}
-	return 0;
 }
 
 void AxLegAngles(double x, double y, double z)
 {
 	double a, d, h;
 	//Femur-Tibia Joint coordinates starting from Femur-Coxa Bracket point
-	POINT_2D JOINT;
+	POINT_2D TF_JOINT;
 	//Calculate the distance between the centres of the circles in Z plane
 	d = sqrt(pow(x, 2) + pow(z, 2));
 	//Check for solutions
@@ -143,21 +131,23 @@ void AxLegAngles(double x, double y, double z)
 		//Circles intersect at one or two points
 		a = (pow(FEMUR_LENGTH, 2) - pow(TIBIA_LENGTH, 2) + pow(d, 2))/(2*d);
 		h = sqrt(pow(FEMUR_LENGTH, 2) - pow(a, 2));
-		JOINT.X = (x*a - z*h)/d;
-		JOINT.Y = (z*a + x*h)/d;
+		TF_JOINT.X = (x*a - y*h)/d;
+		TF_JOINT.Y = (y*a + x*h)/d;
 		//Check Coxa Quarter and find Coxa Polar Angle in rad
 		//The Coxa can only move in Quarter I and IV, therefore X is always positive
-		//Also trasfer the angle in rad into AX type
-		h = atan2(y, x + COXA_LENGTH)*180/M_PI;
-		LEG.TARGET_ANGLES.COXA = (LEG.POLAR_ANGLES.COXA + h)/0.29;
+		h = atan2(z, x + COXA_LENGTH)*180/M_PI;
 		//Check Femur Quarter and find Femur Polar Angle in rad
-		//Also trasfer the angle in rad into AX type
-		a = atan2(JOINT.Y, JOINT.X)*180/M_PI;
-		LEG.TARGET_ANGLES.FEMUR = (LEG.POLAR_ANGLES.FEMUR - a)/0.29;
+		a = atan2(TF_JOINT.Y, TF_JOINT.X)*180/M_PI;
 		//Check Tibia Quarter and find Tibia Polar Angle in rad
-		//Also trasfer the angle in rad into AX type
-		d = atan2(z - JOINT.Y, x - JOINT.X)*180/M_PI;
-		LEG.TARGET_ANGLES.TIBIA = (LEG.POLAR_ANGLES.TIBIA + d - a)/0.29;
+		d = atan2(y - TF_JOINT.Y, x - TF_JOINT.X)*180/M_PI;
+		//Convert angles into AX type for left side servos
+		if(LEG.ID > 2){
+			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE - h)/0.29;
+		}else{
+			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE + h)/0.29;
+		}
+		LEG.TARGET_ANGLES.FEMUR = (FEMUR_POLAR_ANGLE - a)/0.29;
+		LEG.TARGET_ANGLES.TIBIA = (TIBIA_POLAR_ANGLE + d - a)/0.29;
 	}else{
 		//If unreachable set all angles to zero
 		LEG.TARGET_ANGLES.COXA = 0;
@@ -185,9 +175,9 @@ unsigned char AxCheckAngleLimits()
 void AxStartingPosition()
 {
 	AX_LEG_ANGLES ANGLES;
-	ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 - LEG.POLAR_ANGLES.COXA)*M_PI/180;
-	ANGLES.FEMUR = (LEG.POLAR_ANGLES.FEMUR-AxTxIS(ax_servo_ids[LEG.ID][1], ax_read, ax_read_present_position)*0.29)*M_PI/180;
-	ANGLES.TIBIA = (AxTxIS(ax_servo_ids[LEG.ID][2], ax_read, ax_read_present_position)*0.29 + ANGLES.FEMUR - LEG.POLAR_ANGLES.TIBIA)*M_PI/180;
+	ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 - COXA_POLAR_ANGLE)*M_PI/180;
+	ANGLES.FEMUR = (FEMUR_POLAR_ANGLE - AxTxIS(ax_servo_ids[LEG.ID][1], ax_read, ax_read_present_position)*0.29)*M_PI/180;
+	ANGLES.TIBIA = (AxTxIS(ax_servo_ids[LEG.ID][2], ax_read, ax_read_present_position)*0.29 + ANGLES.FEMUR - TIBIA_POLAR_ANGLE)*M_PI/180;
 	LEG.STARTING_POSITION.X = FEMUR_LENGTH*cos(ANGLES.FEMUR) + TIBIA_LENGTH*cos(ANGLES.FEMUR + ANGLES.TIBIA);
 	LEG.STARTING_POSITION.Z = FEMUR_LENGTH*sin(ANGLES.FEMUR) + TIBIA_LENGTH*sin(ANGLES.FEMUR + ANGLES.TIBIA);
 	LEG.STARTING_POSITION.Y = (LEG.STARTING_POSITION.X + COXA_LENGTH)*tan(ANGLES.COXA);
@@ -278,4 +268,11 @@ void AxFindLeg(void)
 			break;
 		}
 	}
+}
+
+void ResetLegs(void)
+{
+	RESET_LEGS = 0;
+	Delay(10);
+	RESET_LEGS = 1;
 }
