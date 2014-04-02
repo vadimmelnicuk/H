@@ -14,25 +14,32 @@
 void main(void)
 {
 	Init();							//Initialise Microcontroller
-	Delay(100);						//Delay 100ms
 
 	#ifdef MODE_CON
-		ResetLegs();
-		Pb1Wait();
-		if(EcanTxPing(5)){			//Ping Servo
-			LED6 = 1;
+		Delay(100);					//Delay 100ms
+		LegsReset();				//Reset legs
+		Pb1Wait();					//Wait for PB1 to be pressed
+		LegsPing();					//Ping legs
+
+		LegStep(5, 1, 60);			//Send the step command to a leg
+		
+		while(1){					//Enter Infinite loop
+			if(timer0_dt){
+				timer0_dt = 0;		//Clear Timer0 timeout flag
+				
+			}
 		}
-		if(EcanTxPing(4)){
-			LED5 = 1;
-		}
-		while(1);
 	#endif
 	#ifdef MODE_LEG
 		AxInit();
-		while(1){
-			//EcanRx(LEG.ID);
-			AxTest();
-			Delay(10);
+		while(!EcanRxPing(LEG.ID));	//Wait for ping instruction
+		while(1){					//Enter Infinite loop
+			if(timer0_dt){
+				timer0_dt = 0;		//Clear Timer0 timeout flag
+				if(EcanRxI(LEG.ID)){
+					LegProcessInstruction();
+				}
+			}
 		}
 	#endif
 	#ifdef MODE_FLASH

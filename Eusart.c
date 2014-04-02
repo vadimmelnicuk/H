@@ -50,13 +50,6 @@ void Tx1Byte(unsigned char byte)
 	TX1_REG = byte;
 }
 
-unsigned short int Tx1Tcti(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
-{
-	unsigned short int i;
-	i = (c2 << 8) | c1;
-	return i;
-}
-
 unsigned char Rx1Byte(void)
 {
 	while(!RX1_FLAG);

@@ -13,10 +13,8 @@
 void Eusart1Mode(unsigned char);
 void Eusart1Test(void);
 void Tx1Byte(unsigned char);
-unsigned short int Tx1Tcti(unsigned char, unsigned char);
 unsigned char Rx1Byte(void);
 unsigned char Rx1ByteTimeOut(void);
-
 
 //Defines
 #define EUART_BAUDRATE 115200

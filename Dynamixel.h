@@ -85,7 +85,6 @@ unsigned short int AxTxIS(unsigned char, unsigned char, unsigned char *);
 void AxRxS(void);
 struct AX_PARAMS AxReadParams(unsigned char);
 void AxFindLeg(void);
-void ResetLegs(void);
 
 //Defines
 #if defined(MODE_LEG) | defined(MODE_CON)

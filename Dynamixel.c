@@ -218,7 +218,7 @@ unsigned short int AxTxIS(unsigned char id, unsigned char instruction, unsigned 
 	AxTxI(id, instruction, params);
 	AxRxS();
 	if(params[2] > 1){
-		return Tx1Tcti(rx1_buffer[5], rx1_buffer[6]);
+		return tcti(rx1_buffer[5], rx1_buffer[6]);
 	}else{
 		return rx1_buffer[5];
 	}
@@ -268,11 +268,4 @@ void AxFindLeg(void)
 			break;
 		}
 	}
-}
-
-void ResetLegs(void)
-{
-	RESET_LEGS = 0;
-	Delay(10);
-	RESET_LEGS = 1;
 }

@@ -58,13 +58,18 @@ void Init(void)
 	LATC = 0;
 
 	//Interrupts Settings
-	RCONbits.IPEN = 1;
-	INTCONbits.GIEH = 1;
-	INTCONbits.GIEL = 1;
-	PIE1bits.TX1IE = 0;
-	PIE1bits.RC1IE = 0;
-	IPR1bits.TX1IP = 1;
-	IPR1bits.RC1IP = 1;
+	RCONbits.IPEN = 1;				//Enable priority
+	INTCONbits.GIEH = 1;			//Enable all high priority interrupts
+	INTCONbits.GIEL = 1;			//Enable all low priority interrupts
+	INTCONbits.TMR0IE = 1;			//Enables the TMR0 overflow interrupt
+	INTCON2bits.TMR0IP = 1;			//High priority
+
+	//Timer0
+	T0CONbits.T0PS = 0b101;			//1:64 Prescale value
+	T0CONbits.PSA = 0;				//Timer0 clock input comes from prescaler output
+	T0CONbits.T0CS = 0;				//Internal instruction cycle clock (CLKO)
+	T0CONbits.T08BIT = 0;			//Timer0 is configured as an 16-bit timer/counter
+	T0CONbits.TMR0ON = 1;			//Timer0 ON
 
 	//EUART Settings
 	BAUDCON1bits.BRG16 = 1;
@@ -107,68 +112,11 @@ void Init(void)
 	while(CANSTATbits.OPMODE != 0);	//Wait for normal mode
 }
 
-void Pb1Wait(void)
+unsigned short int tcti(unsigned char c1, unsigned char c2)	//Two char (low and high bytes) to int
 {
-	while(!PB1){
-		if(PB1){
-			while(PB1);
-			Delay(10);
-			break;
-		}
-	}
-}
-
-void Pb2Wait(void)
-{
-	while(!PB2){
-		if(PB2){
-			while(PB2);
-			Delay(10);
-			break;
-		}
-	}
-}
-
-void LedsOn(void)
-{
-	LED1 = 1;
-	LED2 = 1;
-	LED3 = 1;
-	LED4 = 1;
-	LED5 = 1;
-	LED6 = 1;
-}
-
-void LedsOff(void)
-{
-	LED1 = 0;
-	LED2 = 0;
-	LED3 = 0;
-	LED4 = 0;
-	LED5 = 0;
-	LED6 = 0;
-}
-
-void LedsBlink(void)
-{
-	LED1 = 1;
-	Delay(50);						//TODO Test - change LED timings
-	LED1 = 0;
-	LED2 = 1;
-	Delay(50);
-	LED2 = 0;
-	LED3 = 1;
-	Delay(50);
-	LED3 = 0;
-	LED4 = 1;
-	Delay(50);
-	LED4 = 0;
-	LED5 = 1;
-	Delay(50);
-	LED5 = 0;
-	LED6 = 1;
-	Delay(50);
-	LED6 = 0;
+	unsigned short int i;
+	i = (c2 << 8) | c1;
+	return i;
 }
 
 void Delay(unsigned short int t)

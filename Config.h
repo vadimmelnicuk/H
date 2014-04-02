@@ -18,6 +18,7 @@
 
 #include "Eusart.h"
 #include "Ecan.h"
+#include "Controller.h"
 #include "Dynamixel.h"
 
 //PIC settings
@@ -25,15 +26,13 @@
 
 //Function prototypes
 void Init(void);
-void Pb1Wait(void);
-void Pb2Wait(void);
-void LedsOn(void);
-void LedsOff(void);
-void LedsBlink(void);
+unsigned short int tcti(unsigned char, unsigned char);
 void Delay(unsigned short int);
 
 //Defines
 #define _XTAL_FREQ 64000000
+
+#define TIMER0_COUNTER -10000
 
 #define LED1 LATAbits.LATA0
 #define LED2 LATAbits.LATA1
@@ -48,6 +47,6 @@ void Delay(unsigned short int);
 #define RESET_LEGS LATCbits.LATC5
 
 //Global variables
-
+unsigned char timer0_dt = 0;
 
 #endif	//CONFIG_H
