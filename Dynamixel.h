@@ -53,11 +53,14 @@ typedef struct AX_PARAMS AX_PARAMS;
 
 struct AX_LEG {
 	unsigned char ID;
+	unsigned short int SPEED;
 	AX_PARAMS COXA;
 	AX_PARAMS FEMUR;
 	AX_PARAMS TIBIA;
 	AX_LEG_ANGLES TARGET_ANGLES;
+	POINT_3D TARGET_POSITION;
 	POINT_3D STARTING_POSITION;
+	POINT_3D HOME_POSITION;
 };
 typedef struct AX_LEG AX_LEG;
 
@@ -69,17 +72,16 @@ representing whole Hexapod.
 */
 
 //Function prototypes
-void AxInit(void);
-void AxInitLeg();
-void AxFlash();
+void AxInitLeg(void);
+void AxFlash(void);
 unsigned char AxPing(unsigned char);
 void AxGoTo(unsigned char, unsigned short int, unsigned short int);
 void AxTest(void);
 void AxMoveLeg(unsigned short int, double, double, double);
 void AxLegMoving(void);
 void AxLegAngles(double, double, double);
-unsigned char AxCheckAngleLimits();
-void AxStartingPosition();
+unsigned char AxCheckAngleLimits(void);
+void AxStartingPosition(void);
 void AxTxI(unsigned char, unsigned char, unsigned char *);
 unsigned short int AxTxIS(unsigned char, unsigned char, unsigned char *);
 void AxRxS(void);
@@ -114,14 +116,13 @@ void AxFindLeg(void);
 #define COXA_LENGTH 43.0					//Coxa->Femur mm
 #define FEMUR_LENGTH 120.0					//Femur->Tibia mm
 #define TIBIA_LENGTH 166.0					//Tibia->End of foot mm
-
 #define COXA_POLAR_ANGLE 150.0				//Deg
 #define FEMUR_POLAR_ANGLE 255.0				//Deg
 #define TIBIA_POLAR_ANGLE 225.0				//Deg
-
-#define HOME_POSITION_X 80.0				//
-#define HOME_POSITION_Y 0					//
-#define HOME_POSITION_Z 0					//
+#define DEFAULT_HOME_POSITION_X 80.0		//Default Home position
+#define DEFAULT_HOME_POSITION_Y 0			//Default Home position
+#define DEFAULT_HOME_POSITION_Z 0			//Default Home position
+#define DEFAULT_SPEED 50					//Default Speed
 
 //Global variables
 unsigned char ax_ping = 1;

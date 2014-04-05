@@ -21,18 +21,21 @@ void main(void)
 		Pb1Wait();					//Wait for PB1 to be pressed
 		LegsPing();					//Ping legs
 
-		LegStep(5, 1, 60);			//Send the step command to a leg
+		LegYShift(5, -50);			//Set leg's Y shift
+		LegSpeed(5, 200);			//Set leg's speed
+		LegMove(5, 200, 0, -50);	//Move a leg
+//		LegHome(5);					//Send home command to a leg
+		LegHome(4);					//Send home command to a leg
 		
 		while(1){					//Enter Infinite loop
 			if(timer0_dt){
 				timer0_dt = 0;		//Clear Timer0 timeout flag
-				
 			}
 		}
 	#endif
 	#ifdef MODE_LEG
-		AxInit();
-		while(!EcanRxPing(LEG.ID));	//Wait for ping instruction
+		AxFindLeg();				//Find leg's ID
+		AxInitLeg();				//Initialise default settings
 		while(1){					//Enter Infinite loop
 			if(timer0_dt){
 				timer0_dt = 0;		//Clear Timer0 timeout flag

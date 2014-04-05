@@ -11,22 +11,18 @@
 
 //--------------------------------------------------------------
 
-void AxInit(void)
+void AxInitLeg(void)
 {
-	AxFindLeg();
-	AxInitLeg();
+	LEG.SPEED = DEFAULT_SPEED;							//Default speed
+	LEG.HOME_POSITION.X = DEFAULT_HOME_POSITION_X;		//Default home position x
+	LEG.HOME_POSITION.Y = DEFAULT_HOME_POSITION_Y;		//Default home position y
+	LEG.HOME_POSITION.Z = DEFAULT_HOME_POSITION_Z;		//Default home position z
+	LEG.COXA = AxReadParams(ax_servo_ids[LEG.ID][0]);	//Read default coxa servo settings
+	LEG.FEMUR = AxReadParams(ax_servo_ids[LEG.ID][1]);	//Read default femur servo settings
+	LEG.TIBIA = AxReadParams(ax_servo_ids[LEG.ID][2]);	//Read default tibia servo settings
 }
 
-void AxInitLeg()
-{
-	LEG.COXA = AxReadParams(ax_servo_ids[LEG.ID][0]);
-	LEG.FEMUR = AxReadParams(ax_servo_ids[LEG.ID][1]);
-	LEG.TIBIA = AxReadParams(ax_servo_ids[LEG.ID][2]);
-
-	AxMoveLeg(50, HOME_POSITION_X, HOME_POSITION_Y, HOME_POSITION_Z);
-}
-
-void AxFlash()
+void AxFlash(void)
 {
 	unsigned char ax_flash1[] = {2, 16, AX_STATUS_RETURN_LEVEL};
 	unsigned char ax_flash2[] = {4, 3, AX_FLASH_ID, AX_BAUD_RATE, AX_DELAY_TIME};
@@ -77,6 +73,7 @@ void AxTest(void)
 
 void AxMoveLeg(unsigned short int speed, double x, double y, double z){
 	unsigned char speedl, speedh;
+	y += LEG.HOME_POSITION.Y;
 	AxLegAngles(x, y, z);
 	if(LEG.TARGET_ANGLES.COXA  == 0 && LEG.TARGET_ANGLES.FEMUR == 0 && LEG.TARGET_ANGLES.TIBIA == 0){
 		//TODO - Error handler will be here
@@ -156,7 +153,7 @@ void AxLegAngles(double x, double y, double z)
 	}
 }
 
-unsigned char AxCheckAngleLimits()
+unsigned char AxCheckAngleLimits(void)
 {
 	if(LEG.TARGET_ANGLES.COXA < AX_COXA_CW_LIMIT || LEG.TARGET_ANGLES.COXA > AX_COXA_CCW_LIMIT){
 		//TODO - Error handler will be here
@@ -172,7 +169,7 @@ unsigned char AxCheckAngleLimits()
 	}
 }
 
-void AxStartingPosition()
+void AxStartingPosition(void)
 {
 	AX_LEG_ANGLES ANGLES;
 	ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 - COXA_POLAR_ANGLE)*M_PI/180;

@@ -119,6 +119,15 @@ unsigned short int tcti(unsigned char c1, unsigned char c2)	//Two char (low and 
 	return i;
 }
 
+signed short int uitsi(unsigned short int i)	//Unsigned int to signed int
+{
+	if(i > 32768){
+		return i;
+	}else{
+		return i - 65536;
+	}
+}
+
 void Delay(unsigned short int t)
 {
 	unsigned short int n;

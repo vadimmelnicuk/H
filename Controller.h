@@ -18,7 +18,11 @@ void LedsBlink(void);
 void LegsPing(void);
 void LegsStatus(void);
 void LegsReset(void);
-void LegStep(unsigned char, unsigned char, unsigned short int);
+void LegStep(unsigned char, unsigned char);
+void LegHome(unsigned char);
+void LegYShift(unsigned char, signed short int);
+void LegSpeed(unsigned char, unsigned short int);
+void LegMove(unsigned char, signed short int, signed short int, signed short int);
 void LegProcessInstruction(void);
 
 //Defines

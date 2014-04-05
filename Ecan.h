@@ -9,11 +9,10 @@
 #ifndef ECAN_H
 #define	ECAN_H
 
+//Function prototypes
 void EcanTxI(unsigned char, unsigned char);
 unsigned char EcanTxPing(unsigned char);
 unsigned char EcanRxI(unsigned char);
-unsigned char EcanRxPing(unsigned char);
-//Function prototypes
 
 //Defines
 #define CANTX PORTBbits.RB2

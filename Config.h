@@ -27,12 +27,13 @@
 //Function prototypes
 void Init(void);
 unsigned short int tcti(unsigned char, unsigned char);
+signed short int uitsi(unsigned short int);
 void Delay(unsigned short int);
 
 //Defines
 #define _XTAL_FREQ 64000000
 
-#define TIMER0_COUNTER -10000
+#define TIMER0_COUNTER -1000					//1ms
 
 #define LED1 LATAbits.LATA0
 #define LED2 LATAbits.LATA1

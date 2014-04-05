@@ -37,7 +37,7 @@ unsigned char EcanTxPing(unsigned char id)
 	EcanTxI(id, ecan_ping);
 	for(n = 0; n < 100; n++){
 		if(EcanRxI(ecan_con_id)){
-			if(ecan_rx_buffer[0] == ecan_ping && ecan_rx_buffer[1] == 1){
+			if(ecan_rx_buffer[0] == ecan_ping && ecan_rx_buffer[1] == id){
 				return 1;
 			}
 		}
@@ -49,7 +49,8 @@ unsigned char EcanTxPing(unsigned char id)
 unsigned char EcanRxI(unsigned char id)
 {
 	if(RXB0CONbits.RXFUL){					//Does RXB0 contain a message?
-		if(RXB0SIDLbits.SID == id){
+		RXB0CONbits.RXFUL = 0;				//Receiving is completed
+		if(RXB0SIDLbits.SID == id){			//Is the message for me?
 			if(RXB0DLCbits.DLC > 0){		//Any bytes to read?
 				ecan_rx_buffer[0] = RXB0D0;	//Read instruction
 				ecan_rx_buffer[1] = RXB0D1;	//Read parameters
@@ -59,22 +60,8 @@ unsigned char EcanRxI(unsigned char id)
 				ecan_rx_buffer[5] = RXB0D5;
 				ecan_rx_buffer[6] = RXB0D6;
 				ecan_rx_buffer[7] = RXB0D7;
-				RXB0CONbits.RXFUL = 0;		//Receiving is completed
 				return 1;
 			}
-		}
-	}
-	RXB0CONbits.RXFUL = 0;					//Receiving is completed
-	return 0;
-}
-
-unsigned char EcanRxPing(unsigned char id)
-{
-	if(EcanRxI(id)){
-		if(ecan_rx_buffer[0] == ecan_ping){
-			ecan_tx_buffer[0] = 1;			//Sent ping acknowledge bit
-			EcanTxI(ecan_con_id, ecan_ping);
-			return 1;
 		}
 	}
 	return 0;
