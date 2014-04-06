@@ -107,7 +107,7 @@ void LegsPing(void)
 		LED1 = 1;
 	}
 	Delay(250);								//Delay 250ms
-//	LegsStatus();
+	LegsStatus();
 }
 
 void LegsStatus(void)

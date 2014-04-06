@@ -89,13 +89,6 @@ struct AX_PARAMS AxReadParams(unsigned char);
 void AxFindLeg(void);
 
 //Defines
-#if defined(MODE_LEG) | defined(MODE_CON)
-	#define AX_BAUD_RATE_KBPS 500000		//500 Kbps
-#endif
-#ifdef MODE_FLASH
-	#define AX_BAUD_RATE_KBPS 1000000		//1 Mbps
-#endif
-
 //AX Default Settings
 #define AX_FLASH_ID 1						//Set desired ID for flashed servo
 #define AX_BAUD_RATE 3						//500 Kbps

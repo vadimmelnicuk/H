@@ -29,11 +29,20 @@ void Init(void);
 unsigned short int tcti(unsigned char, unsigned char);
 signed short int uitsi(unsigned short int);
 void Delay(unsigned short int);
+void putch(char);
 
 //Defines
 #define _XTAL_FREQ 64000000
 
 #define TIMER0_COUNTER -1000					//1ms
+
+#ifdef MODE_CON
+	#define EUART_BAUD_RATE_KBPS 115200			//115200 bps
+#elif MODE_LEG
+	#define EUART_BAUD_RATE_KBPS 500000			//500 Kbps
+#elif MODE_FLASH
+	#define EUART_BAUD_RATE_KBPS 1000000		//1 Mbps
+#endif
 
 #define LED1 LATAbits.LATA0
 #define LED2 LATAbits.LATA1

@@ -15,10 +15,10 @@ void Eusart1Test(void);
 void Tx1Byte(unsigned char);
 unsigned char Rx1Byte(void);
 unsigned char Rx1ByteTimeOut(void);
+void TxTerminate(void);
+void TxWelcomeScreen(void);
 
 //Defines
-#define EUART_BAUDRATE 115200
-
 #define TX1_EN TXSTA1bits.TXEN
 #define TX1_EN_PORT LATBbits.LATB5
 #define TX1_FLAG PIR1bits.TX1IF

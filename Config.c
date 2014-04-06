@@ -47,14 +47,14 @@ void Init(void)
 	TRISCbits.TRISC0 = 0;			//RC0 - Output
 	TRISCbits.TRISC1 = 0;			//RC1 - Output
 	TRISCbits.TRISC5 = 0;			//RC5 - Output
-	TRISCbits.TRISC6 = 1;			//RC6 - Input
+	TRISCbits.TRISC6 = 1;			//RC6 - Input TODO TRISCbits.TRISC6 1 or 0 p.333 Datasheet
 	TRISCbits.TRISC7 = 1;			//RC7 - Input
 
-	PORTA = 0;						//Reset PORTs
+	PORTA = 0;						//Reset PORTs & LATs
 	LATA = 0;
-	PORTB = 0;						//Reset PORTs
+	PORTB = 0;						//Reset PORTs & LATs
 	LATB = 0;
-	PORTC = 0;						//Reset PORTs
+	PORTC = 0;						//Reset PORTs & LATs
 	LATC = 0;
 
 	//Interrupts Settings
@@ -71,20 +71,21 @@ void Init(void)
 	T0CONbits.T08BIT = 0;			//Timer0 is configured as an 16-bit timer/counter
 	T0CONbits.TMR0ON = 1;			//Timer0 ON
 
-	//EUART Settings
-	BAUDCON1bits.BRG16 = 1;
-	BAUDCON1bits.CKTXP = 0;
+	//EUSART Settings
+	BAUDCON1bits.BRG16 = 1;			//16-bit Baud Rate Generator
+	BAUDCON1bits.CKTXP = 0;			//
 	
-	SPBRG1 = ((_XTAL_FREQ/4)/AX_BAUD_RATE_KBPS)-1;		//Calculate BAUDRATE register value for AX Servo comms
+	SPBRG1 = (((_XTAL_FREQ/4)/EUART_BAUD_RATE_KBPS)-1) & 0xFF;		//Calculate BAUDRATE - low byte
+	SPBRGH1 = (((_XTAL_FREQ/4)/EUART_BAUD_RATE_KBPS)-1) >> 8;		//High byte
 
-	TXSTA1bits.BRGH = 1;
-	TXSTA1bits.SYNC = 0;
-	TXSTA1bits.TXEN = 0;
-	TXSTA1bits.TX9 = 0;
+	TXSTA1bits.BRGH = 1;			//High speed
+	TXSTA1bits.SYNC = 0;			//Asynchronous mode
+	TXSTA1bits.TXEN = 0;			//Transmit is enabled
+	TXSTA1bits.TX9 = 0;				//Selects 8-bit transmission
 
-	RCSTA1bits.CREN = 0;
-	RCSTA1bits.RX9 = 0;
-	RCSTA1bits.SPEN = 1;
+	RCSTA1bits.CREN = 0;			//Enables receiver
+	RCSTA1bits.RX9 = 0;				//Selects 8-bit reception
+	RCSTA1bits.SPEN = 1;			//Serial port is enabled
 
 	//ECAN Settings
 	CANCONbits.REQOP = 0b100;		//Request configuration mode
@@ -134,4 +135,9 @@ void Delay(unsigned short int t)
 	for(n = 0; n <= t; n++){
 		__delay_ms(1);
 	}
+}
+
+void putch(char data)
+{
+	Tx1Byte(data);
 }

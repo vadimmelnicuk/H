@@ -37,11 +37,9 @@ void Eusart1Mode(unsigned char mode)
 
 void Eusart1Test(void)
 {
-	while(1){
-		Eusart1Mode(0);
-		Tx1Byte(rand()%255);				//Send random Byte
-		while(!TX1_STATUS);					//Wait for transmit to finish
-	}
+	Eusart1Mode(0);
+	Tx1Byte(rand()%255);					//Send random Byte
+	while(!TX1_STATUS);						//Wait for transmit to finish
 }
 
 void Tx1Byte(unsigned char byte)
@@ -69,4 +67,29 @@ unsigned char Rx1ByteTimeOut(void)
 	}
 	rx1_timeout = 0;
 	return RX1_REG;
+}
+
+void TxTerminate(void)
+{
+	printf("\r\n");
+}
+
+void TxWelcomeScreen(void)
+{
+	printf("  _   _                                _ \n");
+	printf(" | | | | _____  ____ _ _ __   ___   __| |\n");
+	printf(" | |_| |/ _ \\ \\/ / _` | '_ \\ / _ \\ / _` |\n");
+	printf(" |  _  |  __/>  < (_| | |_) | (_) | (_| |\n");
+	printf(" |_|_|_|\\___/_/\\_\\__,_| .__/ \\___/ \\__,_|\n");
+	printf(" |  _ \\ _ __ ___ (_) _|_| ___| |_        \n");
+	printf(" | |_) | '__/ _ \\| |/ _ \\/ __| __|       \n");
+	printf(" |  __/| | | (_) | |  __/ (__| |_        \n");
+	printf(" |_|   |_|  \\___// |\\___|\\___|\\__|       \n");
+	printf("               |__/                      \n");
+	printf("*****************************************\n");
+	printf(" Birmingham City University\n");
+	printf(" Designed by Vadim Melnicuk\n");
+	printf(" 2014\n");
+	printf("*****************************************\n");
+	TxTerminate();
 }

@@ -19,17 +19,23 @@ void main(void)
 		Delay(100);					//Delay 100ms
 		LegsReset();				//Reset legs
 		Pb1Wait();					//Wait for PB1 to be pressed
-		LegsPing();					//Ping legs
-
-		LegYShift(5, -50);			//Set leg's Y shift
-		LegSpeed(5, 200);			//Set leg's speed
-		LegMove(5, 200, 0, -50);	//Move a leg
+		
+//		LegsPing();					//Ping legs
+//		LegYShift(5, -50);			//Set leg's Y shift
+//		LegSpeed(5, 200);			//Set leg's speed
+//		LegMove(5, 200, 0, -50);	//Move a leg
 //		LegHome(5);					//Send home command to a leg
-		LegHome(4);					//Send home command to a leg
+//		LegHome(4);					//Send home command to a leg
+
+		Eusart1Mode(0);				//TX
+//		printf("\033[2J\033[;H");	//Clear screen
+		TxWelcomeScreen();			//Print welcome screen
+		Eusart1Mode(1);				//RX
 		
 		while(1){					//Enter Infinite loop
 			if(timer0_dt){
 				timer0_dt = 0;		//Clear Timer0 timeout flag
+				rx1_buffer[0] = Rx1Byte();
 			}
 		}
 	#endif
