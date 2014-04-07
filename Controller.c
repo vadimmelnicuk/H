@@ -107,7 +107,7 @@ void LegsPing(void)
 		LED1 = 1;
 	}
 	Delay(250);								//Delay 250ms
-	LegsStatus();
+//	LegsStatus();
 }
 
 void LegsStatus(void)
@@ -137,20 +137,20 @@ void LegsReset(void)
 	RESET_LEGS = 1;
 }
 
-void LegStep(unsigned char id, unsigned char dir)
+void LegWriteStep(unsigned char id, unsigned char dir)
 {
 	ecan_tx_buffer[0] = 1;					//Step command
 	ecan_tx_buffer[1] = dir;				//Direction - Forward
 	EcanTxI(id, ecan_write);
 }
 
-void LegHome(unsigned char id)
+void LegWriteHome(unsigned char id)
 {
 	ecan_tx_buffer[0] = 2;					//Home command
 	EcanTxI(id, ecan_write);
 }
 
-void LegYShift(unsigned char id, signed short int y)
+void LegWriteYShift(unsigned char id, signed short int y)
 {
 	ecan_tx_buffer[0] = 3;					//Y shift command
 	ecan_tx_buffer[1] = y & 0xFF;			//Y low byte
@@ -158,7 +158,7 @@ void LegYShift(unsigned char id, signed short int y)
 	EcanTxI(id, ecan_write);
 }
 
-void LegSpeed(unsigned char id, unsigned short int speed)
+void LegWriteSpeed(unsigned char id, unsigned short int speed)
 {
 	ecan_tx_buffer[0] = 4;					//Speed command
 	ecan_tx_buffer[1] = speed & 0xFF;		//Speed low byte
@@ -166,7 +166,7 @@ void LegSpeed(unsigned char id, unsigned short int speed)
 	EcanTxI(id, ecan_write);
 }
 
-void LegMove(unsigned char id, signed short int x, signed short int y, signed short int z)
+void LegWriteMove(unsigned char id, signed short int x, signed short int y, signed short int z)
 {
 	ecan_tx_buffer[0] = 5;					//Move command
 	ecan_tx_buffer[1] = x & 0xFF;			//X low byte
@@ -178,6 +178,28 @@ void LegMove(unsigned char id, signed short int x, signed short int y, signed sh
 	EcanTxI(id, ecan_write);
 }
 
+void LegWriteTorqueOff(unsigned char id)
+{
+	ecan_tx_buffer[0] = 6;					//Torque off command
+	EcanTxI(id, ecan_write);
+}
+
+unsigned char LegReadMoving(unsigned char id)
+{
+	unsigned short int n;
+	ecan_tx_buffer[0] = 1;					//Check if a leg is in move command
+	EcanTxI(id, ecan_read);
+	for(n = 0; n < 100; n++){
+		if(EcanRxI(ecan_con_id)){
+			if(ecan_rx_buffer[0] == ecan_read && ecan_rx_buffer[1] == 1){
+				return 1;
+			}
+		}
+		Delay(1);							//Delay 1ms
+	}
+	return 0;
+}
+
 void LegProcessInstruction(void)
 {
 	switch(ecan_rx_buffer[0]){
@@ -185,17 +207,40 @@ void LegProcessInstruction(void)
 			ecan_tx_buffer[0] = LEG.ID;		//Sent ping acknowledgement
 			EcanTxI(ecan_con_id, ecan_ping);
 			break;
-		case 2:								//Ping instruction
+		case 2:								//Read instruction
+			switch(ecan_rx_buffer[1]){
+				case 1:						//Check if a leg is in move command
+					ecan_tx_buffer[0] = AxLegMoving();	//Moving?
+					EcanTxI(ecan_con_id, ecan_read);	//Send instruction to the main controller
+					break;
+				default:
+					break;
+			}
 			break;
-		case 3:								//Ping instruction
+		case 3:								//Write instruction
 			switch(ecan_rx_buffer[1]){
 				case 1:						//Step command TODO - implement steps
-					AxMoveLeg(LEG.SPEED, 200, 0, 0);		//Speed, X, Y, Z
-					AxLegMoving();
+					if(ecan_rx_buffer[2]){	//Forwards step
+						AxLegMove(LEG.SPEED, 150, 0, 0);	//Speed, X, Y, Z
+						while(AxLegMoving())Delay(10);		//Leg is moving?
+						Delay(1500);
+						AxLegMove(LEG.SPEED, 150, -30, 80);	//Speed, X, Y, Z
+						while(AxLegMoving())Delay(10);		//Leg is moving?
+						Delay(1500);
+						AxLegMove(LEG.SPEED, 150, -30, 0);	//Speed, X, Y, Z
+						while(AxLegMoving())Delay(10);		//Leg is moving?
+						Delay(1500);
+						AxLegMove(LEG.SPEED, 150, -30, -80);//Speed, X, Y, Z
+						while(AxLegMoving())Delay(10);		//Leg is moving?
+						Delay(1500);
+						AxLegMove(LEG.SPEED, 150, 0, -80);	//Speed, X, Y, Z
+						while(AxLegMoving())Delay(10);		//Leg is moving?
+					}else{					//Backwards step
+
+					}
 					break;
 				case 2:						//Home command
-					AxMoveLeg(LEG.SPEED, LEG.HOME_POSITION.X, LEG.HOME_POSITION.Y, LEG.HOME_POSITION.Z);
-					AxLegMoving();
+					AxLegMove(LEG.SPEED, LEG.HOME_POSITION.X, LEG.HOME_POSITION.Y, LEG.HOME_POSITION.Z);
 					break;
 				case 3:						//Y shift command
 					LEG.HOME_POSITION.Y = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
@@ -203,12 +248,17 @@ void LegProcessInstruction(void)
 				case 4:						//Speed command
 					LEG.SPEED = tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]);
 					break;
-				case 5:
+				case 5:						//Move command
 					LEG.TARGET_POSITION.X = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 					LEG.TARGET_POSITION.Y = uitsi(tcti(ecan_rx_buffer[4], ecan_rx_buffer[5]));
 					LEG.TARGET_POSITION.Z = uitsi(tcti(ecan_rx_buffer[6], ecan_rx_buffer[7]));
-					AxMoveLeg(LEG.SPEED, LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, LEG.TARGET_POSITION.Z);
-					AxLegMoving();
+					AxLegMove(LEG.SPEED, LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, LEG.TARGET_POSITION.Z);
+					break;
+				case 6:						//Torque off command
+					ax_write_torque_en[2] = 0;
+					AxTxI(ax_servo_ids[LEG.ID][0], ax_write, ax_write_torque_en);
+					AxTxI(ax_servo_ids[LEG.ID][1], ax_write, ax_write_torque_en);
+					AxTxI(ax_servo_ids[LEG.ID][2], ax_write, ax_write_torque_en);
 					break;
 				default:
 					break;

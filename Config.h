@@ -34,7 +34,7 @@ void putch(char);
 //Defines
 #define _XTAL_FREQ 64000000
 
-#define TIMER0_COUNTER -1000					//1ms
+#define TIMER0_COUNTER -100						//100 us
 
 #ifdef MODE_CON
 	#define EUART_BAUD_RATE_KBPS 115200			//115200 bps

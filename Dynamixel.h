@@ -77,8 +77,8 @@ void AxFlash(void);
 unsigned char AxPing(unsigned char);
 void AxGoTo(unsigned char, unsigned short int, unsigned short int);
 void AxTest(void);
-void AxMoveLeg(unsigned short int, double, double, double);
-void AxLegMoving(void);
+void AxLegMove(unsigned short int, double, double, double);
+unsigned char AxLegMoving(void);
 void AxLegAngles(double, double, double);
 unsigned char AxCheckAngleLimits(void);
 void AxStartingPosition(void);
@@ -106,7 +106,7 @@ void AxFindLeg(void);
 #define AX_STATUS_RETURN_LEVEL 1			//Return only for the READ command
 #define AX_LOCK 0							//EEPROM area can be modified
 
-#define COXA_LENGTH 43.0					//Coxa->Femur mm
+#define COXA_LENGTH 42.0					//Coxa->Femur mm
 #define FEMUR_LENGTH 120.0					//Femur->Tibia mm
 #define TIBIA_LENGTH 166.0					//Tibia->End of foot mm
 #define COXA_POLAR_ANGLE 150.0				//Deg
@@ -152,7 +152,7 @@ unsigned char ax_write_lowest_limit_voltage[] = {2,12,60};
 unsigned char ax_write_highest_limit_voltage[] = {2,13,140};
 unsigned char ax_write_max_torque[] = {3,14,255,3};
 unsigned char ax_write_status_return_level[] = {2,16,2};
-unsigned char ax_write_torque_en[] = {2,24,1};
+unsigned char ax_write_torque_en[] = {2,24,0};
 unsigned char ax_write_lock[] = {2,47,0};
 unsigned char ax_write_goal_position[] = {5,30,0,2,0,2};
 unsigned char ax_write_goal_position_home[] = {5,30,0,2,0,2};

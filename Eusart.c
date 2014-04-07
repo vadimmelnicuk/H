@@ -76,20 +76,24 @@ void TxTerminate(void)
 
 void TxWelcomeScreen(void)
 {
-	printf("  _   _                                _ \n");
-	printf(" | | | | _____  ____ _ _ __   ___   __| |\n");
-	printf(" | |_| |/ _ \\ \\/ / _` | '_ \\ / _ \\ / _` |\n");
-	printf(" |  _  |  __/>  < (_| | |_) | (_) | (_| |\n");
-	printf(" |_|_|_|\\___/_/\\_\\__,_| .__/ \\___/ \\__,_|\n");
-	printf(" |  _ \\ _ __ ___ (_) _|_| ___| |_        \n");
-	printf(" | |_) | '__/ _ \\| |/ _ \\/ __| __|       \n");
-	printf(" |  __/| | | (_) | |  __/ (__| |_        \n");
-	printf(" |_|   |_|  \\___// |\\___|\\___|\\__|       \n");
-	printf("               |__/                      \n");
-	printf("*****************************************\n");
-	printf(" Birmingham City University\n");
-	printf(" Designed by Vadim Melnicuk\n");
-	printf(" 2014\n");
-	printf("*****************************************\n");
-	TxTerminate();
+	printf("  _   _                                _ \r\n");
+	printf(" | | | | _____  ____ _ _ __   ___   __| |\r\n");
+	printf(" | |_| |/ _ \\ \\/ / _` | '_ \\ / _ \\ / _` |\r\n");
+	printf(" |  _  |  __/>  < (_| | |_) | (_) | (_| |\r\n");
+	printf(" |_|_|_|\\___/_/\\_\\__,_| .__/ \\___/ \\__,_|\r\n");
+	printf(" |  _ \\ _ __ ___ (_) _|_| ___| |_        \r\n");
+	printf(" | |_) | '__/ _ \\| |/ _ \\/ __| __|       \r\n");
+	printf(" |  __/| | | (_) | |  __/ (__| |_        \r\n");
+	printf(" |_|   |_|  \\___// |\\___|\\___|\\__|       \r\n");
+	printf("               |__/                      \r\n");
+	printf("*****************************************\r\n");
+	printf(" Birmingham City University\r\n");
+	printf(" Designed by Vadim Melnicuk\r\n");
+	printf(" 2014\r\n");
+	printf("*****************************************\r\n");
+}
+
+void TxClearScreen(void)
+{
+	printf("\033[2J\033[;H");	//Clear screen & move cursor to home position
 }

@@ -61,17 +61,17 @@ void AxGoTo(unsigned char id, unsigned short int position, unsigned short int sp
 
 void AxTest(void)
 {
-	AxMoveLeg(60, 100, 0, -50);					//Speed, Coxa, Femur, Tibia
+	AxLegMove(60, 100, 0, -50);					//Speed, Coxa, Femur, Tibia
 	AxLegMoving();
-	AxMoveLeg(60, 100, 20, 0);
+	AxLegMove(60, 100, 20, 0);
 	AxLegMoving();
-	AxMoveLeg(60, 100, 0, 50);
+	AxLegMove(60, 100, 0, 50);
 	AxLegMoving();
-	AxMoveLeg(60, 100, 20, 0);
+	AxLegMove(60, 100, 20, 0);
 	AxLegMoving();
 }
 
-void AxMoveLeg(unsigned short int speed, double x, double y, double z){
+void AxLegMove(unsigned short int speed, double x, double y, double z){
 	unsigned char speedl, speedh;
 	y += LEG.HOME_POSITION.Y;
 	AxLegAngles(x, y, z);
@@ -101,50 +101,57 @@ void AxMoveLeg(unsigned short int speed, double x, double y, double z){
 	}
 }
 
-void AxLegMoving(void)
+unsigned char AxLegMoving(void)
 {
 	unsigned char n;
-	unsigned char c = 1;
-	while(c){
-		c = 0;
-		for(n = 0; n <= 2; n++){
-			if(AxTxIS(ax_servo_ids[LEG.ID][n], ax_read, ax_read_moving)){
-				c = 1;
-			}
+	for(n = 0; n <= 2; n++){
+		if(AxTxIS(ax_servo_ids[LEG.ID][n], ax_read, ax_read_moving)){
+			return 1;
 		}
-		Delay(10);
 	}
+	return 0;
 }
 
 void AxLegAngles(double x, double y, double z)
 {
-	double a, d, h;
+	double a, b, d, h, A, B, C;
 	//Femur-Tibia Joint coordinates starting from Femur-Coxa Bracket point
-	POINT_2D TF_JOINT;
-	//Calculate the distance between the centres of the circles in Z plane
-	d = sqrt(pow(x, 2) + pow(z, 2));
+	POINT_2D P2, P3 = {0};
+	//Find coordinates of P0 in Z plane
+	A = atan2(z, x);
+	if(z != 0){
+		b = sin(A)*COXA_LENGTH;
+	}else{
+		b = COXA_LENGTH;
+	}
+	//Calculate the distance between the centres of the circles in Y plane
+	d = sqrt(pow((x - b), 2) + pow(y, 2));
 	//Check for solutions
 	if(d != 0 && d < (FEMUR_LENGTH + TIBIA_LENGTH)){
 		//Circles intersect at one or two points
 		a = (pow(FEMUR_LENGTH, 2) - pow(TIBIA_LENGTH, 2) + pow(d, 2))/(2*d);
 		h = sqrt(pow(FEMUR_LENGTH, 2) - pow(a, 2));
-		TF_JOINT.X = (x*a - y*h)/d;
-		TF_JOINT.Y = (y*a + x*h)/d;
-		//Check Coxa Quarter and find Coxa Polar Angle in rad
+		P2.X = a*(x - b)/d;
+		P2.Y = a*y/d;
+		P3.X = P2.X - h*y/d;
+		P3.Y = P2.Y + h*(x - b)/d;
+//		P3.X = ((x - b)*a - y*h)/d;
+//		P3.Y = (y*a + (x - b)*h)/d;
+		//Check Coxa Quarter and find Coxa Polar Angle in deg
 		//The Coxa can only move in Quarter I and IV, therefore X is always positive
-		h = atan2(z, x + COXA_LENGTH)*180/M_PI;
-		//Check Femur Quarter and find Femur Polar Angle in rad
-		a = atan2(TF_JOINT.Y, TF_JOINT.X)*180/M_PI;
+		A *= 180/M_PI;
+		//Check Femur Quarter and find Femur Polar Angle in deg
+		B = atan2(P3.Y, P3.X)*180/M_PI;
 		//Check Tibia Quarter and find Tibia Polar Angle in rad
-		d = atan2(y - TF_JOINT.Y, x - TF_JOINT.X)*180/M_PI;
-		//Convert angles into AX type for left side servos
+		C = atan2(y - P3.Y, x - P3.X)*180/M_PI;
+		//Convert angles into AX type
 		if(LEG.ID > 2){
-			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE - h)/0.29;
+			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE - A)/0.29;
 		}else{
-			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE + h)/0.29;
+			LEG.TARGET_ANGLES.COXA = (COXA_POLAR_ANGLE + A)/0.29;
 		}
-		LEG.TARGET_ANGLES.FEMUR = (FEMUR_POLAR_ANGLE - a)/0.29;
-		LEG.TARGET_ANGLES.TIBIA = (TIBIA_POLAR_ANGLE + d - a)/0.29;
+		LEG.TARGET_ANGLES.FEMUR = (FEMUR_POLAR_ANGLE - B)/0.29;
+		LEG.TARGET_ANGLES.TIBIA = (TIBIA_POLAR_ANGLE + C - B)/0.29;
 	}else{
 		//If unreachable set all angles to zero
 		LEG.TARGET_ANGLES.COXA = 0;
