@@ -95,5 +95,5 @@ void TxWelcomeScreen(void)
 
 void TxClearScreen(void)
 {
-	printf("\033[2J\033[;H");	//Clear screen & move cursor to home position
+	printf("\033[2J\033[;H");				//Clear screen & move cursor to home position
 }

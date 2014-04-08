@@ -137,22 +137,15 @@ void LegsReset(void)
 	RESET_LEGS = 1;
 }
 
-void LegWriteStep(unsigned char id, unsigned char dir)
-{
-	ecan_tx_buffer[0] = 1;					//Step command
-	ecan_tx_buffer[1] = dir;				//Direction - Forward
-	EcanTxI(id, ecan_write);
-}
-
 void LegWriteHome(unsigned char id)
 {
-	ecan_tx_buffer[0] = 2;					//Home command
+	ecan_tx_buffer[0] = 1;					//Home command
 	EcanTxI(id, ecan_write);
 }
 
 void LegWriteYShift(unsigned char id, signed short int y)
 {
-	ecan_tx_buffer[0] = 3;					//Y shift command
+	ecan_tx_buffer[0] = 2;					//Y shift command
 	ecan_tx_buffer[1] = y & 0xFF;			//Y low byte
 	ecan_tx_buffer[2] = y >> 8;				//Y high byte
 	EcanTxI(id, ecan_write);
@@ -160,7 +153,7 @@ void LegWriteYShift(unsigned char id, signed short int y)
 
 void LegWriteSpeed(unsigned char id, unsigned short int speed)
 {
-	ecan_tx_buffer[0] = 4;					//Speed command
+	ecan_tx_buffer[0] = 3;					//Speed command
 	ecan_tx_buffer[1] = speed & 0xFF;		//Speed low byte
 	ecan_tx_buffer[2] = speed >> 8;			//Speed high byte
 	EcanTxI(id, ecan_write);
@@ -168,7 +161,7 @@ void LegWriteSpeed(unsigned char id, unsigned short int speed)
 
 void LegWriteMove(unsigned char id, signed short int x, signed short int y, signed short int z)
 {
-	ecan_tx_buffer[0] = 5;					//Move command
+	ecan_tx_buffer[0] = 4;					//Move command
 	ecan_tx_buffer[1] = x & 0xFF;			//X low byte
 	ecan_tx_buffer[2] = x >> 8;				//X high byte
 	ecan_tx_buffer[3] = y & 0xFF;			//Y low byte
@@ -180,7 +173,21 @@ void LegWriteMove(unsigned char id, signed short int x, signed short int y, sign
 
 void LegWriteTorqueOff(unsigned char id)
 {
-	ecan_tx_buffer[0] = 6;					//Torque off command
+	ecan_tx_buffer[0] = 5;					//Torque off command
+	EcanTxI(id, ecan_write);
+}
+
+void LegWriteStep(unsigned char id, unsigned char dir)
+{
+	ecan_tx_buffer[0] = 6;					//Step command
+	ecan_tx_buffer[1] = dir;				//Direction - Forward
+	EcanTxI(id, ecan_write);
+}
+
+void LegWriteStepTransit(unsigned char id, unsigned char dir)
+{
+	ecan_tx_buffer[0] = 7;					//Step command
+	ecan_tx_buffer[1] = dir;				//Direction - Forward
 	EcanTxI(id, ecan_write);
 }
 
@@ -219,46 +226,32 @@ void LegProcessInstruction(void)
 			break;
 		case 3:								//Write instruction
 			switch(ecan_rx_buffer[1]){
-				case 1:						//Step command TODO - implement steps
-					if(ecan_rx_buffer[2]){	//Forwards step
-						AxLegMove(LEG.SPEED, 150, 0, 0);	//Speed, X, Y, Z
-						while(AxLegMoving())Delay(10);		//Leg is moving?
-						Delay(1500);
-						AxLegMove(LEG.SPEED, 150, -30, 80);	//Speed, X, Y, Z
-						while(AxLegMoving())Delay(10);		//Leg is moving?
-						Delay(1500);
-						AxLegMove(LEG.SPEED, 150, -30, 0);	//Speed, X, Y, Z
-						while(AxLegMoving())Delay(10);		//Leg is moving?
-						Delay(1500);
-						AxLegMove(LEG.SPEED, 150, -30, -80);//Speed, X, Y, Z
-						while(AxLegMoving())Delay(10);		//Leg is moving?
-						Delay(1500);
-						AxLegMove(LEG.SPEED, 150, 0, -80);	//Speed, X, Y, Z
-						while(AxLegMoving())Delay(10);		//Leg is moving?
-					}else{					//Backwards step
-
-					}
+				case 1:						//Home command
+					AxLegMove(LEG.HOME_POSITION.X, LEG.HOME_POSITION.Y, LEG.HOME_POSITION.Z);
 					break;
-				case 2:						//Home command
-					AxLegMove(LEG.SPEED, LEG.HOME_POSITION.X, LEG.HOME_POSITION.Y, LEG.HOME_POSITION.Z);
-					break;
-				case 3:						//Y shift command
+				case 2:						//Y shift command
 					LEG.HOME_POSITION.Y = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 					break;
-				case 4:						//Speed command
+				case 3:						//Speed command
 					LEG.SPEED = tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]);
 					break;
-				case 5:						//Move command
+				case 4:						//Move command
 					LEG.TARGET_POSITION.X = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 					LEG.TARGET_POSITION.Y = uitsi(tcti(ecan_rx_buffer[4], ecan_rx_buffer[5]));
 					LEG.TARGET_POSITION.Z = uitsi(tcti(ecan_rx_buffer[6], ecan_rx_buffer[7]));
-					AxLegMove(LEG.SPEED, LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, LEG.TARGET_POSITION.Z);
+					AxLegMove(LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, LEG.TARGET_POSITION.Z);
 					break;
-				case 6:						//Torque off command
+				case 5:						//Torque off command
 					ax_write_torque_en[2] = 0;
 					AxTxI(ax_servo_ids[LEG.ID][0], ax_write, ax_write_torque_en);
 					AxTxI(ax_servo_ids[LEG.ID][1], ax_write, ax_write_torque_en);
 					AxTxI(ax_servo_ids[LEG.ID][2], ax_write, ax_write_torque_en);
+					break;
+				case 6:						//Step command TODO - implement steps
+					AxLegStep(ecan_rx_buffer[2]);
+					break;
+				case 7:						//Step transit command TODO - implement steps
+					AxLegStepTransit(ecan_rx_buffer[2]);
 					break;
 				default:
 					break;

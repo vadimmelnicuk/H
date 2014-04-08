@@ -21,29 +21,34 @@ void main(void)
 		Pb1Wait();					//Wait for PB1 to be pressed
 		
 		LegsPing();					//Ping legs
-//		LegWriteYShift(5, -30);		//Set leg's Y shift
-//		LegWriteYShift(4, -20);		//Set leg's Y shift
-//		LegWriteSpeed(5, 120);		//Set leg's speed
-//		LegWriteSpeed(4, 120);		//Set leg's speed
+		LegWriteYShift(5, -40);		//Set leg's Y shift
+		LegWriteYShift(4, -40);		//Set leg's Y shift
+		LegWriteSpeed(5, 120);		//Set leg's speed
+		LegWriteSpeed(4, 120);		//Set leg's speed
+//		LegWriteStep(5, 1);			//Make a leg to step
 		LegWriteStep(4, 1);			//Make a leg to step
+		
+		Delay(1000);
+		LegWriteStepTransit(4, 1);	//Make a leg to step
 //		while(LegReadMoving(4))Delay(10);	//Leg is moving?
 //		LegWriteStep(5, 1);			//Make a leg to step
 //		while(LegReadMoving(5))Delay(10);	//Leg is moving?
 		
-		LegWriteTorqueOff(4);		//Turn off a leg's torque
-		LegWriteTorqueOff(5);		//Turn off a leg's torque
+//		LegWriteTorqueOff(4);		//Turn off a leg's torque
+//		LegWriteTorqueOff(5);		//Turn off a leg's torque
 //		LegWriteHome(5);			//Send home command to a leg
 //		LegWriteHome(4);			//Send home command to a leg
 
-//		Eusart1Mode(0);				//TX mode
-//		TxClearScreen();			//Clear terminal screen
-//		TxWelcomeScreen();			//Print welcome screen in terminal
-//		Eusart1Mode(1);				//RX mode
+		Eusart1Mode(0);				//TX mode
+		TxClearScreen();			//Clear terminal screen
+		TxWelcomeScreen();			//Print welcome screen in terminal
+//		AxLegStepTable();
+		Eusart1Mode(1);				//RX mode
 		
 		while(1){					//Enter Infinite loop
 			if(timer0_dt){
 				timer0_dt = 0;		//Clear Timer0 timeout flag
-//				rx1_buffer[0] = Rx1Byte();
+				rx1_buffer[0] = Rx1Byte();
 			}
 		}
 	#endif
