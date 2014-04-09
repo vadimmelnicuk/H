@@ -21,18 +21,18 @@ void main(void)
 		Pb1Wait();					//Wait for PB1 to be pressed
 		
 		LegsPing();					//Ping legs
-		LegWriteYShift(5, -40);		//Set leg's Y shift
-		LegWriteYShift(4, -40);		//Set leg's Y shift
-		LegWriteSpeed(5, 120);		//Set leg's speed
-		LegWriteSpeed(4, 120);		//Set leg's speed
+//		LegWriteYShift(5, -65);		//Set leg's Y shift
+//		LegWriteYShift(4, -65);		//Set leg's Y shift
+//		LegWriteSpeed(5, 120);		//Set leg's speed
+//		LegWriteSpeed(4, 120);		//Set leg's speed
 //		LegWriteStep(5, 1);			//Make a leg to step
-		LegWriteStep(4, 1);			//Make a leg to step
-		
-		Delay(1000);
-		LegWriteStepTransit(4, 1);	//Make a leg to step
-//		while(LegReadMoving(4))Delay(10);	//Leg is moving?
-//		LegWriteStep(5, 1);			//Make a leg to step
+//		LegWriteStep(4, 1);			//Make a leg to step
+//		Delay(3000);				//TODO - wait for all legs to finish the step
+//		LegWriteStepTransit(5, 1);	//Make a leg to step
+//		LegWriteStepTransit(4, 1);	//Make a leg to step
 //		while(LegReadMoving(5))Delay(10);	//Leg is moving?
+		Delay(1000);
+		LegWriteHome(3);			//Send home command to a leg
 		
 //		LegWriteTorqueOff(4);		//Turn off a leg's torque
 //		LegWriteTorqueOff(5);		//Turn off a leg's torque

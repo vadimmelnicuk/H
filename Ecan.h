@@ -11,7 +11,6 @@
 
 //Function prototypes
 void EcanTxI(unsigned char, unsigned char);
-unsigned char EcanTxPing(unsigned char);
 unsigned char EcanRxI(unsigned char);
 
 //Defines

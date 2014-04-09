@@ -25,12 +25,15 @@ void LegWriteMove(unsigned char, signed short int, signed short int, signed shor
 void LegWriteTorqueOff(unsigned char);
 void LegWriteStep(unsigned char, unsigned char);
 void LegWriteStepTransit(unsigned char, unsigned char);
+unsigned char LegReadPing(unsigned char);
 unsigned char LegReadMoving(unsigned char);
 void LegProcessInstruction(void);
+unsigned char ConProcessStatus(unsigned char, unsigned char);
 
 //Defines
 
 //Global variables
-unsigned char legs_status_buffer[6] = {0};
+unsigned char legs_status[6] = {0};
+unsigned char legs_step[6] = {0};
 
 #endif	//CONTROLLER_H

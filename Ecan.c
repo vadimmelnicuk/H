@@ -31,21 +31,6 @@ void EcanTxI(unsigned char id, unsigned char instruction)
  	while(TXB0CONbits.TXREQ);				//Wait for transmit to finish
 }
 
-unsigned char EcanTxPing(unsigned char id)
-{
-	unsigned short int n;
-	EcanTxI(id, ecan_ping);
-	for(n = 0; n < 100; n++){
-		if(EcanRxI(ecan_con_id)){
-			if(ecan_rx_buffer[0] == ecan_ping && ecan_rx_buffer[1] == id){
-				return 1;
-			}
-		}
-		Delay(1);							//Delay 1ms
-	}
-	return 0;
-}
-
 unsigned char EcanRxI(unsigned char id)
 {
 	if(RXB0CONbits.RXFUL){					//Does RXB0 contain a message?
