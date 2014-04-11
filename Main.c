@@ -21,24 +21,60 @@ void main(void)
 		Pb1Wait();					//Wait for PB1 to be pressed
 		
 		LegsPing();					//Ping legs
-//		LegWriteYShift(5, -65);		//Set leg's Y shift
-//		LegWriteYShift(4, -65);		//Set leg's Y shift
-//		LegWriteSpeed(5, 120);		//Set leg's speed
-//		LegWriteSpeed(4, 120);		//Set leg's speed
-//		LegWriteStep(5, 1);			//Make a leg to step
-//		LegWriteStep(4, 1);			//Make a leg to step
-//		Delay(3000);				//TODO - wait for all legs to finish the step
-//		LegWriteStepTransit(5, 1);	//Make a leg to step
-//		LegWriteStepTransit(4, 1);	//Make a leg to step
-//		while(LegReadMoving(5))Delay(10);	//Leg is moving?
-		Delay(1000);
-		LegWriteHome(3);			//Send home command to a leg
-		
-//		LegWriteTorqueOff(4);		//Turn off a leg's torque
-//		LegWriteTorqueOff(5);		//Turn off a leg's torque
-//		LegWriteHome(5);			//Send home command to a leg
-//		LegWriteHome(4);			//Send home command to a leg
 
+		LegWriteSpeed(5, 120);		//Set leg's speed
+		LegWriteSpeed(4, 120);		//Set leg's speed
+		LegWriteSpeed(3, 120);		//Set leg's speed
+		LegWriteSpeed(2, 120);		//Set leg's speed
+		LegWriteSpeed(1, 120);		//Set leg's speed
+		LegWriteSpeed(0, 120);		//Set leg's speed
+
+		LegWriteHome(5);			//Send home command to a leg
+		LegWriteHome(4);			//Send home command to a leg
+		LegWriteHome(3);			//Send home command to a leg
+		LegWriteHome(2);			//Send home command to a leg
+		LegWriteHome(1);			//Send home command to a leg
+		LegWriteHome(0);			//Send home command to a leg
+
+		LegWriteYShift(5, -60);		//Send Y shift command to a leg
+		LegWriteYShift(4, -60);		//Send Y shift command to a leg
+		LegWriteYShift(3, -60);		//Send Y shift command to a leg
+		LegWriteYShift(2, -60);		//Send Y shift command to a leg
+		LegWriteYShift(1, -60);		//Send Y shift command to a leg
+		LegWriteYShift(0, -60);		//Send Y shift command to a leg
+
+		Delay(3000);
+
+		LegWriteStepBegin(5, 1);	//Send step begin command to a leg
+		LegWriteStepBegin(4, 0);	//Send step begin command to a leg
+		LegWriteStepBegin(3, 1);	//Send step begin command to a leg
+		LegWriteStepBegin(2, 0);	//Send step begin command to a leg
+		LegWriteStepBegin(1, 1);	//Send step begin command to a leg
+		LegWriteStepBegin(0, 0);	//Send step begin command to a leg
+
+		Delay(3000);
+
+		Pb1Wait();					//Wait for PB1 to be pressed
+
+		LegWriteStep(5, 1);			//Make a leg to step
+//		LegWriteStep(4, 1);			//Make a leg to step
+		LegWriteStep(3, 1);			//Make a leg to step
+//		LegWriteStep(2, 1);			//Make a leg to step
+		LegWriteStep(1, 1);			//Make a leg to step
+//		LegWriteStep(0, 1);			//Make a leg to step
+
+//		Delay(3000);				//TODO - wait for all legs to finish the step
+		
+//		LegWriteStepTransit(5, 1);	//Make a leg to step
+		LegWriteStepTransit(4, 1);	//Make a leg to step
+//		LegWriteStepTransit(3, 1);	//Make a leg to step
+		LegWriteStepTransit(2, 1);	//Make a leg to step
+//		LegWriteStepTransit(1, 1);	//Make a leg to step
+		LegWriteStepTransit(0, 1);	//Make a leg to step
+
+//		LegWriteTorqueOff(5);		//Turn off a leg's torque
+//		while(LegReadMoving(5))Delay(10);	//Leg is moving?
+		
 		Eusart1Mode(0);				//TX mode
 		TxClearScreen();			//Clear terminal screen
 		TxWelcomeScreen();			//Print welcome screen in terminal

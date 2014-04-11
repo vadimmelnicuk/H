@@ -81,26 +81,32 @@ void LegsPing(void)
 		legs_status[0] = 1;
 		LED1 = 1;
 	}
+	Delay(250);								//Delay 250ms
 	if(LegReadPing(1)){						//Ping Servo
 		legs_status[1] = 1;
 		LED2 = 1;
 	}
+	Delay(250);								//Delay 250ms
 	if(LegReadPing(2)){						//Ping Servo
 		legs_status[2] = 1;
 		LED3 = 1;
 	}
+	Delay(250);								//Delay 250ms
 	if(LegReadPing(3)){						//Ping Servo
 		legs_status[3] = 1;
 		LED4 = 1;
 	}
+	Delay(250);								//Delay 250ms
 	if(LegReadPing(4)){						//Ping Servo
 		legs_status[4] = 1;
 		LED5 = 1;
 	}
+	Delay(250);								//Delay 250ms
 	if(LegReadPing(5)){						//Ping Servo
 		legs_status[5] = 1;
 		LED6 = 1;
 	}
+	Delay(250);								//Delay 250ms
 //	LegsStatus();							//Flash leds for inactive legs
 }
 
@@ -191,29 +197,36 @@ void LegWriteStepTransit(unsigned char id, unsigned char dir)
 	EcanTxI(id, ecan_write);
 }
 
+void LegWriteStepBegin(unsigned char id, unsigned char dir)
+{
+	ecan_tx_buffer[0] = 8;					//Step begin command
+	ecan_tx_buffer[1] = dir;				//Direction - Forward
+	EcanTxI(id, ecan_write);
+}
+
 unsigned char LegReadPing(unsigned char id)
 {
 	EcanTxI(id, ecan_ping);
-	return ConProcessStatus(ecan_ping, id);
+	return ConProcessStatusTO(ecan_ping, id);
 }
 
 unsigned char LegReadMoving(unsigned char id)
 {
 	ecan_tx_buffer[0] = 1;					//Check if a leg is in move command
 	EcanTxI(id, ecan_read);
-	return ConProcessStatus(ecan_read, 1);
+	return ConProcessStatusTO(ecan_read, 1);
 }
 
 void LegProcessInstruction(void)
 {
 	switch(ecan_rx_buffer[0]){
-	case 1:								//Ping instruction
-		ecan_tx_buffer[0] = LEG.ID;		//Sent ping acknowledgement
+	case 1:									//Ping instruction
+		ecan_tx_buffer[0] = LEG.ID;			//Sent ping acknowledgement
 		EcanTxI(ecan_con_id, ecan_ping);
 		break;
-	case 2:								//Read instruction
+	case 2:									//Read instruction
 		switch(ecan_rx_buffer[1]){
-		case 1:						//Check if a leg is in move command
+		case 1:								//Check if a leg is in move command
 			ecan_tx_buffer[0] = AxLegMoving();	//Moving?
 			EcanTxI(ecan_con_id, ecan_read);	//Send instruction to the main controller
 			break;
@@ -221,36 +234,39 @@ void LegProcessInstruction(void)
 			break;
 		}
 		break;
-	case 3:								//Write instruction
+	case 3:									//Write instruction
 		switch(ecan_rx_buffer[1]){
-		case 1:						//Home command
-			AxLegMove(LEG.HOME_POSITION.X, LEG.HOME_POSITION.Y, LEG.HOME_POSITION.Z);
+		case 1:								//Home command
+			AxLegMove(DEFAULT_HOME_POSITION_X, DEFAULT_HOME_POSITION_Y, DEFAULT_HOME_POSITION_Z);
 			break;
-		case 2:						//Y shift command
-			LEG.HOME_POSITION.Y = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
+		case 2:								//Y shift command
+			LEG.SHIFT.Y = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 			break;
-		case 3:						//Speed command
+		case 3:								//Speed command
 			LEG.SPEED = tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]);
 			break;
-		case 4:						//Move command
+		case 4:								//Move command
 			LEG.TARGET_POSITION.X = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 			LEG.TARGET_POSITION.Y = uitsi(tcti(ecan_rx_buffer[4], ecan_rx_buffer[5]));
 			LEG.TARGET_POSITION.Z = uitsi(tcti(ecan_rx_buffer[6], ecan_rx_buffer[7]));
 			AxLegMove(LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, LEG.TARGET_POSITION.Z);
 			break;
-		case 5:						//Torque off command
+		case 5:								//Torque off command
 			ax_write_torque_en[2] = 0;
 			AxTxI(ax_servo_ids[LEG.ID][0], ax_write, ax_write_torque_en);
 			AxTxI(ax_servo_ids[LEG.ID][1], ax_write, ax_write_torque_en);
 			AxTxI(ax_servo_ids[LEG.ID][2], ax_write, ax_write_torque_en);
 			break;
-		case 6:						//Step command TODO - implement steps
+		case 6:								//Step command TODO - implement steps
 			AxLegStep(ecan_rx_buffer[2]);
-			ecan_tx_buffer[0] = LEG.ID;			//Finished
+			ecan_tx_buffer[0] = LEG.ID;		//Finished
 			EcanTxI(ecan_con_id, ecan_write);	//Send instruction to the main controller
 			break;
-		case 7:						//Step transit command TODO - implement steps
+		case 7:								//Step transit command TODO - implement steps
 			AxLegStepTransit(ecan_rx_buffer[2]);
+			break;
+		case 8:								//Step begin command
+			AxLegStepBegin(ecan_rx_buffer[2]);
 			break;
 		default:
 			break;
@@ -263,14 +279,23 @@ void LegProcessInstruction(void)
 
 unsigned char ConProcessStatus(unsigned char instruction, unsigned char status)
 {
+	if(EcanRxI(ecan_con_id)){
+		if(ecan_rx_buffer[0] == instruction && ecan_rx_buffer[1] == status){
+			return 1;
+		}
+	}
+	return 0;
+}
+
+unsigned char ConProcessStatusTO(unsigned char instruction, unsigned char status)
+{
 	unsigned char n;
-	for(n = 0; n < 250; n++){
-		if(EcanRxI(ecan_con_id)){
-			if(ecan_rx_buffer[0] == instruction && ecan_rx_buffer[1] == status){
-				return 1;
-			}
+	for(n = 0; n < CON_PROCESS_STATUS_TIMEOUT; n++){
+		if(ConProcessStatus(instruction, status)){
+			return 1;
 		}
 		Delay(1);							//Delay 1ms
 	}
 	return 0;
 }
+

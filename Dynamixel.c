@@ -22,9 +22,6 @@ void AxInitLeg(void)
 		LEG.ORIENTATION = 1;							//Middle
 	}													//Default front = 0
 	LEG.SPEED = DEFAULT_SPEED;							//Default speed
-	LEG.HOME_POSITION.X = DEFAULT_HOME_POSITION_X;		//Default home position x
-	LEG.HOME_POSITION.Y = DEFAULT_HOME_POSITION_Y;		//Default home position y
-	LEG.HOME_POSITION.Z = DEFAULT_HOME_POSITION_Z;		//Default home position z
 	LEG.COXA = AxReadParams(ax_servo_ids[LEG.ID][0]);	//Read default coxa servo settings
 	LEG.FEMUR = AxReadParams(ax_servo_ids[LEG.ID][1]);	//Read default femur servo settings
 	LEG.TIBIA = AxReadParams(ax_servo_ids[LEG.ID][2]);	//Read default tibia servo settings
@@ -103,14 +100,51 @@ void AxLegStepTable(void)
 	printf("}\r\n");
 }
 
+void AxLegStepBegin(unsigned char dir)
+{
+	if(dir){									//Step forward
+		switch(LEG.ORIENTATION){
+		case 0:									//Front
+			AxLegMove(STEP_I, 0, -1*STEP_I);	//X, Y, Z
+			AxLegMoving();
+			break;
+		case 1:									//Middle
+			AxLegMove(STEP_X, 0, -1*STEP_Z/2);	//X, Y, Z
+			AxLegMoving();
+			break;
+		case 2:									//Back
+			AxLegMove(2*STEP_I, 0, 0);			//X, Y, Z
+			AxLegMoving();
+			break;
+		default:
+			break;
+		}
+	}else{										//Step backward
+		switch(LEG.ORIENTATION){
+		case 0:									//Front
+			AxLegMove(2*STEP_I, 0, 0);			//X, Y, Z
+			AxLegMoving();
+			break;
+		case 1:									//Middle
+			AxLegMove(STEP_X, 0, STEP_Z/2);		//X, Y, Z
+			AxLegMoving();
+			break;
+		case 2:									//Back
+			AxLegMove(STEP_I, 0, STEP_I);		//X, Y, Z
+			AxLegMoving();
+			break;
+		default:
+			break;
+		}
+	}
+}
+
 void AxLegStep(unsigned char dir)
 {
 	unsigned char n;
 	if(dir){									//Step forward
 		switch(LEG.ORIENTATION){
 		case 0:									//Front
-			AxLegMove(STEP_I, 0, -1*STEP_I);				//Speed, X, Y, Z
-			while(AxLegMoving())Delay(1);		//Leg is moving?
 			for(n = 1; n <= STEP_RES; n++){
 				AxLegMove(STEP_I + STEP_I/2/STEP_RES*n, STEP_Y/STEP_RES*n*cos_table[n-1], -1*STEP_I + STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
@@ -121,8 +155,6 @@ void AxLegStep(unsigned char dir)
 			}
 			break;
 		case 1:									//Middle
-			AxLegMove(STEP_X, 0, -1*STEP_Z/2);	//Speed, X, Y, Z
-			while(AxLegMoving())Delay(1);		//Leg is moving?
 			for(n = 1; n <= STEP_RES; n++){
 				AxLegMove(STEP_X, STEP_Y/STEP_RES*n*cos_table[n-1], STEP_Z/2/STEP_RES*n - STEP_Z/2);	//Speed, X, Y, Z
 				Delay(STEP_DELAY);
@@ -133,6 +165,14 @@ void AxLegStep(unsigned char dir)
 			}
 			break;
 		case 2:									//Back
+			for(n = 1; n <= STEP_RES; n++){
+				AxLegMove(2*STEP_I - STEP_I/2/STEP_RES*n, STEP_Y/STEP_RES*n*cos_table[n-1], STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				Delay(STEP_DELAY);
+			}
+			for(n = 1; n <= STEP_RES; n++){
+				AxLegMove(1.5*STEP_I - STEP_I/2/STEP_RES*n, STEP_Y - STEP_Y/STEP_RES*n*cos_table[n-1],  STEP_I/2 + STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				Delay(STEP_DELAY);
+			}
 			break;
 		default:
 			break;
@@ -164,6 +204,10 @@ void AxLegStepTransit(unsigned char dir)
 			}
 			break;
 		case 2:									//Back
+			for(n = 1; n <= STEP_RES*2; n++){
+				AxLegMove(STEP_I + STEP_I/(STEP_RES*2)*n, 0, STEP_I - STEP_I/(STEP_RES*2)*n);			//Speed, X, Y, Z
+				Delay(STEP_DELAY);
+			}
 			break;
 		default:
 			break;
@@ -175,7 +219,7 @@ void AxLegStepTransit(unsigned char dir)
 
 void AxLegMove(double x, double y, double z){
 	unsigned char speedl, speedh;
-	y += LEG.HOME_POSITION.Y;
+	y += LEG.SHIFT.Y;
 	AxLegAngles(x, y, z);
 	if(LEG.TARGET_ANGLES.COXA  == 0 && LEG.TARGET_ANGLES.FEMUR == 0 && LEG.TARGET_ANGLES.TIBIA == 0){
 		//TODO - Error handler will be here

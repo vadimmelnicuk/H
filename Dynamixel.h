@@ -62,7 +62,7 @@ struct AX_LEG {
 	AX_LEG_ANGLES TARGET_ANGLES;
 	POINT_3D TARGET_POSITION;
 	POINT_3D STARTING_POSITION;
-	POINT_3D HOME_POSITION;
+	POINT_3D SHIFT;
 };
 typedef struct AX_LEG AX_LEG;
 
@@ -80,6 +80,7 @@ unsigned char AxPing(unsigned char);
 void AxGoTo(unsigned char, unsigned short int, unsigned short int);
 void AxTest(void);
 void AxLegStepTable(void);
+void AxLegStepBegin(unsigned char);
 void AxLegStep(unsigned char);
 void AxLegStepTransit(unsigned char);
 void AxLegMove(double, double, double);
@@ -124,7 +125,7 @@ void AxFindLeg(void);
 #define STEP_RES 10
 #define STEP_DELAY 25
 #define STEP_X 120.0
-#define STEP_Y 30.0
+#define STEP_Y 50.0
 #define STEP_Z 120.0
 #define STEP_I 84.8528
 
