@@ -19,7 +19,7 @@ void main(void)
 		Delay(100);					//Delay 100ms
 		LegsReset();				//Reset legs
 		Pb1Wait();					//Wait for PB1 to be pressed
-		
+/*
 		LegsPing();					//Ping legs
 
 		LegWriteSpeed(5, 120);		//Set leg's speed
@@ -74,7 +74,7 @@ void main(void)
 
 //		LegWriteTorqueOff(5);		//Turn off a leg's torque
 //		while(LegReadMoving(5))Delay(10);	//Leg is moving?
-		
+*/
 		Eusart1Mode(0);				//TX mode
 		TxClearScreen();			//Clear terminal screen
 		TxWelcomeScreen();			//Print welcome screen in terminal
