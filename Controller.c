@@ -80,34 +80,51 @@ void LegsPing(void)
 	if(LegReadPing(0)){						//Ping Servo
 		legs_status[0] = 1;
 		LED1 = 1;
+		printf("Leg FR - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg FR - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
 	if(LegReadPing(1)){						//Ping Servo
 		legs_status[1] = 1;
 		LED2 = 1;
+		printf("Leg MR - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg MR - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
 	if(LegReadPing(2)){						//Ping Servo
 		legs_status[2] = 1;
 		LED3 = 1;
+		printf("Leg BR - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg BR - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
 	if(LegReadPing(3)){						//Ping Servo
 		legs_status[3] = 1;
 		LED4 = 1;
+		printf("Leg BL - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg BL - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
 	if(LegReadPing(4)){						//Ping Servo
 		legs_status[4] = 1;
 		LED5 = 1;
+		printf("Leg ML - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg ML - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
 	if(LegReadPing(5)){						//Ping Servo
 		legs_status[5] = 1;
 		LED6 = 1;
+		printf("Leg FL - \033[32;1mOK\033[0m\r\n");
+	}else{
+		printf("Leg FL - \033[31;1mERROR\033[0m\r\n");
 	}
 	Delay(250);								//Delay 250ms
-//	LegsStatus();							//Flash leds for inactive legs
 }
 
 void LegsStatus(void)
@@ -115,6 +132,7 @@ void LegsStatus(void)
 	unsigned char n;
 	for(n = 0; n <= 5; n++){
 		if(!legs_status[n]){
+			printf("Please attached the missing leg, I cannot walk overwise...\r\n");
 			while(1){
 				LedsOff();
 				Delay(100);					//Delay 100ms
@@ -299,3 +317,50 @@ unsigned char ConProcessStatusTO(unsigned char instruction, unsigned char status
 	return 0;
 }
 
+void ConProcessCommand(void)
+{
+	switch(con_state){
+		case 0:								//Initialisation
+			if(rx1_buffer[0] == 13){		//ENTER pressed?
+				LedsBlink();				//Blink LEDs
+				LedsBlink();				//Blink LEDs
+				LedsBlink();				//Blink LEDs
+				LegsReset();				//Reset legs
+				printf("Reset legs - \033[32;1mOK\033[0m\r\n");
+				printf("Pinging legs...\r\n");
+//				LegsPing();					//Ping legs
+//				LegsStatus();				//Flash leds for inactive legs
+				printf("Everything seems to be functional.\r\n");
+				printf("Moving legs to the home position...\r\n");
+				LegWriteHome(5);			//Send home command to a leg
+				LegWriteHome(4);			//Send home command to a leg
+				LegWriteHome(3);			//Send home command to a leg
+				LegWriteHome(2);			//Send home command to a leg
+				LegWriteHome(1);			//Send home command to a leg
+				LegWriteHome(0);			//Send home command to a leg
+				LegWriteSpeed(5, 120);		//Set leg's speed
+				LegWriteSpeed(4, 120);		//Set leg's speed
+				LegWriteSpeed(3, 120);		//Set leg's speed
+				LegWriteSpeed(2, 120);		//Set leg's speed
+				LegWriteSpeed(1, 120);		//Set leg's speed
+				LegWriteSpeed(0, 120);		//Set leg's speed
+				LegWriteYShift(5, -80);		//Send Y shift command to a leg
+				LegWriteYShift(4, -80);		//Send Y shift command to a leg
+				LegWriteYShift(3, -80);		//Send Y shift command to a leg
+				LegWriteYShift(2, -80);		//Send Y shift command to a leg
+				LegWriteYShift(1, -80);		//Send Y shift command to a leg
+				LegWriteYShift(0, -80);		//Send Y shift command to a leg
+				Delay(3000);				//Delay 3s
+				printf("Press \"ENTER\" to lift the body...\r\n\r\n");
+				con_state = 1;				//Move to the next state
+			}
+			break;
+		case 1:
+			if(rx1_buffer[0] == 13){		//ENTER
+				
+			}
+			break;
+		default:
+			break;
+	}
+}

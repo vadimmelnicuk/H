@@ -16,12 +16,8 @@ void main(void)
 	Init();							//Initialise Microcontroller
 
 	#ifdef MODE_CON					//Main controller mode
-		Delay(100);					//Delay 100ms
-		LegsReset();				//Reset legs
 		Pb1Wait();					//Wait for PB1 to be pressed
-		
-		LegsPing();					//Ping legs
-
+/*
 		LegWriteSpeed(5, 120);		//Set leg's speed
 		LegWriteSpeed(4, 120);		//Set leg's speed
 		LegWriteSpeed(3, 120);		//Set leg's speed
@@ -74,7 +70,7 @@ void main(void)
 
 //		LegWriteTorqueOff(5);		//Turn off a leg's torque
 //		while(LegReadMoving(5))Delay(10);	//Leg is moving?
-		
+*/
 		Eusart1Mode(0);				//TX mode
 		TxClearScreen();			//Clear terminal screen
 		TxWelcomeScreen();			//Print welcome screen in terminal
@@ -85,6 +81,9 @@ void main(void)
 			if(timer0_dt){
 				timer0_dt = 0;		//Clear Timer0 timeout flag
 				rx1_buffer[0] = Rx1Byte();
+				Eusart1Mode(0);		//TX mode
+				ConProcessCommand();
+				Eusart1Mode(1);		//RX mode
 			}
 		}
 	#endif
