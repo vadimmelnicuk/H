@@ -18,6 +18,7 @@ unsigned char Rx1ByteTimeOut(void);
 void TxTerminate(void);
 void TxWelcomeScreen(void);
 void TxClearScreen(void);
+void TxClearStyle(void);
 
 //Defines
 #define TX1_EN TXSTA1bits.TXEN

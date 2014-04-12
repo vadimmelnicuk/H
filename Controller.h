@@ -31,11 +31,13 @@ unsigned char LegReadMoving(unsigned char);
 void LegProcessInstruction(void);
 unsigned char ConProcessStatus(unsigned char, unsigned char);
 unsigned char ConProcessStatusTO(unsigned char, unsigned char);
+void ConProcessCommand(void);
 
 //Defines
 #define CON_PROCESS_STATUS_TIMEOUT 250				//250 ms
 
 //Global variables
+unsigned char con_state = 0;
 unsigned char legs_status[6] = {0};
 unsigned char legs_step[6] = {0};
 
