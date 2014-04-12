@@ -18,11 +18,6 @@ void main(void)
 	#ifdef MODE_CON					//Main controller mode
 		Pb1Wait();					//Wait for PB1 to be pressed
 /*
-<<<<<<< HEAD
-		LegsPing();					//Ping legs
-
-=======
->>>>>>> a1a1bf0522b8eb757d922e55a75c46eb3ed3d795
 		LegWriteSpeed(5, 120);		//Set leg's speed
 		LegWriteSpeed(4, 120);		//Set leg's speed
 		LegWriteSpeed(3, 120);		//Set leg's speed

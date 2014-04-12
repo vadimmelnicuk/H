@@ -18,6 +18,7 @@ unsigned char Rx1ByteTimeOut(void);
 void TxTerminate(void);
 void TxWelcomeScreen(void);
 void TxClearScreen(void);
+void TxClearLine(void);
 void TxClearStyle(void);
 
 //Defines

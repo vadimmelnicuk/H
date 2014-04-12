@@ -101,6 +101,11 @@ void TxClearScreen(void)
 	printf("\033[2J\033[;H");				//Clear screen & move cursor to home position
 }
 
+void TxClearLine(void)
+{
+	printf("\033[2K");				//Clear line & move cursor to home position
+}
+
 void TxClearStyle(void)
 {
 	printf("\033[0m");						//Clear style

@@ -79,10 +79,10 @@ void AxFlash(void);
 unsigned char AxPing(unsigned char);
 void AxGoTo(unsigned char, unsigned short int, unsigned short int);
 void AxTest(void);
-void AxLegStepTable(void);
 void AxLegStepBegin(unsigned char);
 void AxLegStep(unsigned char);
 void AxLegStepTransit(unsigned char);
+void AxLegLift(signed short int);
 void AxLegMove(double, double, double);
 unsigned char AxLegMoving(void);
 void AxLegAngles(double, double, double);
@@ -125,8 +125,8 @@ void AxFindLeg(void);
 #define STEP_RES 10
 #define STEP_DELAY 25
 #define STEP_X 120.0
-#define STEP_Y 50.0
-#define STEP_Z 120.0
+#define STEP_Y 120.0
+#define STEP_Z 50.0
 #define STEP_I 84.8528
 
 //Global variables

@@ -66,7 +66,7 @@ void AxGoTo(unsigned char id, unsigned short int position, unsigned short int sp
 
 void AxTest(void)
 {
-	AxLegMove(100, 0, -50);					//Speed, Coxa, Femur, Tibia
+	AxLegMove(100, 0, -50);
 	AxLegMoving();
 	AxLegMove(100, 20, 0);
 	AxLegMoving();
@@ -76,40 +76,16 @@ void AxTest(void)
 	AxLegMoving();
 }
 
-void AxLegStepTable(void)
-{
-	signed short int n;
-	unsigned char res = 10;
-	printf("step_table[%d][3] = {", res*4);
-	for(n = 0; n < res; n++){
-		AxLegAngles(120, 0 - 30/res*n, 80/25*n);
-		printf("{%f,%f,%f},", LEG.TARGET_ANGLES.COXA, LEG.TARGET_ANGLES.FEMUR, LEG.TARGET_ANGLES.TIBIA);
-	}
-	for(n = 0; n < res; n++){
-		AxLegAngles(120, -30, 80 - 80/res*n);
-		printf("{%f,%f,%f},", LEG.TARGET_ANGLES.COXA, LEG.TARGET_ANGLES.FEMUR, LEG.TARGET_ANGLES.TIBIA);
-	}
-	for(n = 0; n < res; n++){
-		AxLegAngles(120, -30, 0 - 80/res*n);
-		printf("{%f,%f,%f},", LEG.TARGET_ANGLES.COXA, LEG.TARGET_ANGLES.FEMUR, LEG.TARGET_ANGLES.TIBIA);
-	}
-	for(n = 0; n < res; n++){
-		AxLegAngles(120, 30/res*n, -80);
-		printf("{%f,%f,%f},", LEG.TARGET_ANGLES.COXA, LEG.TARGET_ANGLES.FEMUR, LEG.TARGET_ANGLES.TIBIA);
-	}
-	printf("}\r\n");
-}
-
 void AxLegStepBegin(unsigned char dir)
 {
 	if(dir){									//Step forward
 		switch(LEG.ORIENTATION){
 		case 0:									//Front
-			AxLegMove(STEP_I, 0, -1*STEP_I);	//X, Y, Z
+			AxLegMove(STEP_I, -1*STEP_I, 0);	//X, Y, Z
 			AxLegMoving();
 			break;
 		case 1:									//Middle
-			AxLegMove(STEP_X, 0, -1*STEP_Z/2);	//X, Y, Z
+			AxLegMove(STEP_X, -1*STEP_Y/2, 0);	//X, Y, Z
 			AxLegMoving();
 			break;
 		case 2:									//Back
@@ -126,11 +102,11 @@ void AxLegStepBegin(unsigned char dir)
 			AxLegMoving();
 			break;
 		case 1:									//Middle
-			AxLegMove(STEP_X, 0, STEP_Z/2);		//X, Y, Z
+			AxLegMove(STEP_X, STEP_Y/2, 0);		//X, Y, Z
 			AxLegMoving();
 			break;
 		case 2:									//Back
-			AxLegMove(STEP_I, 0, STEP_I);		//X, Y, Z
+			AxLegMove(STEP_I, STEP_I, 0);		//X, Y, Z
 			AxLegMoving();
 			break;
 		default:
@@ -146,31 +122,31 @@ void AxLegStep(unsigned char dir)
 		switch(LEG.ORIENTATION){
 		case 0:									//Front
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(STEP_I + STEP_I/2/STEP_RES*n, STEP_Y/STEP_RES*n*cos_table[n-1], -1*STEP_I + STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				AxLegMove(STEP_I + STEP_I/2/STEP_RES*n, -1*STEP_I + STEP_I/2/STEP_RES*n, STEP_Z/STEP_RES*n*cos_table[n-1]);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(1.5*STEP_I + STEP_I/2/STEP_RES*n, STEP_Y - STEP_Y/STEP_RES*n*cos_table[n-1], -1*STEP_I/2 + STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				AxLegMove(1.5*STEP_I + STEP_I/2/STEP_RES*n, -1*STEP_I/2 + STEP_I/2/STEP_RES*n, STEP_Z - STEP_Z/STEP_RES*n*cos_table[n-1]);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
 		case 1:									//Middle
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(STEP_X, STEP_Y/STEP_RES*n*cos_table[n-1], STEP_Z/2/STEP_RES*n - STEP_Z/2);	//Speed, X, Y, Z
+				AxLegMove(STEP_X, STEP_Y/2/STEP_RES*n - STEP_Y/2, STEP_Z/STEP_RES*n*cos_table[n-1]);	//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(STEP_X, STEP_Y - STEP_Y/STEP_RES*n*cos_table[n-1], STEP_Z/2/STEP_RES*n);		//Speed, X, Y, Z
+				AxLegMove(STEP_X, STEP_Y/2/STEP_RES*n, STEP_Z - STEP_Z/STEP_RES*n*cos_table[n-1]);		//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
 		case 2:									//Back
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(2*STEP_I - STEP_I/2/STEP_RES*n, STEP_Y/STEP_RES*n*cos_table[n-1], STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				AxLegMove(2*STEP_I - STEP_I/2/STEP_RES*n, STEP_I/2/STEP_RES*n, STEP_Z/STEP_RES*n*cos_table[n-1]);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(1.5*STEP_I - STEP_I/2/STEP_RES*n, STEP_Y - STEP_Y/STEP_RES*n*cos_table[n-1],  STEP_I/2 + STEP_I/2/STEP_RES*n);			//Speed, X, Y, Z
+				AxLegMove(1.5*STEP_I - STEP_I/2/STEP_RES*n, STEP_I/2 + STEP_I/2/STEP_RES*n, STEP_Z - STEP_Z/STEP_RES*n*cos_table[n-1]);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
@@ -189,23 +165,23 @@ void AxLegStepTransit(unsigned char dir)
 		switch(LEG.ORIENTATION){
 		case 0:									//Front
 			for(n = 1; n <= STEP_RES*2; n++){
-				AxLegMove(2*STEP_I - STEP_I/(STEP_RES*2)*n, 0, -1*STEP_I/(STEP_RES*2)*n);			//Speed, X, Y, Z
+				AxLegMove(2*STEP_I - STEP_I/(STEP_RES*2)*n, -1*STEP_I/(STEP_RES*2)*n, 0);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
 		case 1:									//Middle
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(STEP_X, 0, STEP_Z/2 - STEP_Z/2/STEP_RES*n);		//Speed, X, Y, Z
+				AxLegMove(STEP_X, STEP_Y/2 - STEP_Y/2/STEP_RES*n, 0);		//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			for(n = 1; n <= STEP_RES; n++){
-				AxLegMove(STEP_X, 0, -1*STEP_Z/2/STEP_RES*n);		//Speed, X, Y, Z
+				AxLegMove(STEP_X, -1*STEP_Y/2/STEP_RES*n, 0);		//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
 		case 2:									//Back
 			for(n = 1; n <= STEP_RES*2; n++){
-				AxLegMove(STEP_I + STEP_I/(STEP_RES*2)*n, 0, STEP_I - STEP_I/(STEP_RES*2)*n);			//Speed, X, Y, Z
+				AxLegMove(STEP_I + STEP_I/(STEP_RES*2)*n, STEP_I - STEP_I/(STEP_RES*2)*n, 0);			//Speed, X, Y, Z
 				Delay(STEP_DELAY);
 			}
 			break;
@@ -217,22 +193,37 @@ void AxLegStepTransit(unsigned char dir)
 	}
 }
 
+void AxLegLift(signed short int z)
+{
+	unsigned char n;
+	double i;
+	i = LEG.TARGET_POSITION.Z;
+	for(n = 1; n <= STEP_RES; n++){
+		AxLegMove(LEG.TARGET_POSITION.X, LEG.TARGET_POSITION.Y, i + ((double)z)/STEP_RES*n);		//Speed, X, Y, Z
+		Delay(STEP_DELAY);
+	}
+	LEG.SHIFT.Z += z;
+}
+
 void AxLegMove(double x, double y, double z){
 	unsigned char speedl, speedh;
-	y += LEG.SHIFT.Y;
+	z += LEG.SHIFT.Z;
 	AxLegAngles(x, y, z);
 	if(LEG.TARGET_ANGLES.COXA  == 0 && LEG.TARGET_ANGLES.FEMUR == 0 && LEG.TARGET_ANGLES.TIBIA == 0){
 		//TODO - Error handler will be here
 	}else{
 		if(AxCheckAngleLimits()){
+			LEG.TARGET_POSITION.X = x;
+			LEG.TARGET_POSITION.Y = y;
+			LEG.TARGET_POSITION.Z = z;
 			speedl = LEG.SPEED & 0xFF;
 			speedh = LEG.SPEED >> 8;
-			ax_write_leg_goal_position[3] = ax_servo_ids[LEG.ID][0];					//Coxa ID
+			ax_write_leg_goal_position[3] = ax_servo_ids[LEG.ID][0];				//Coxa ID
 			ax_write_leg_goal_position[4] = (int)LEG.TARGET_ANGLES.COXA & 0xFF;		//Coxa Position Low byte
 			ax_write_leg_goal_position[5] = (int)LEG.TARGET_ANGLES.COXA >> 8;		//Coxa Position High byte
 			ax_write_leg_goal_position[6] = speedl;									//Coxa Speed Low Byte
 			ax_write_leg_goal_position[7] = speedh;									//Coxa Speed High Byte
-			ax_write_leg_goal_position[8] = ax_servo_ids[LEG.ID][1];					//Femur ID
+			ax_write_leg_goal_position[8] = ax_servo_ids[LEG.ID][1];				//Femur ID
 			ax_write_leg_goal_position[9] = (int)LEG.TARGET_ANGLES.FEMUR & 0xFF;	//Femur Position Low byte
 			ax_write_leg_goal_position[10] = (int)LEG.TARGET_ANGLES.FEMUR >> 8;		//Femur Position High byte
 			ax_write_leg_goal_position[11] = speedl;								//Femur Speed Low Byte
@@ -264,23 +255,23 @@ void AxLegAngles(double x, double y, double z)
 	//Femur-Tibia Joint coordinates starting from Femur-Coxa Bracket point
 	POINT_2D P3;
 	//Calculate the distance between the centres of the circles in Y plane
-	b = sqrt(pow(x, 2) + pow(z, 2)) - COXA_LENGTH;
-	d = sqrt(pow(b, 2) + pow(y, 2));
+	b = sqrt(pow(x, 2) + pow(y, 2)) - COXA_LENGTH;
+	d = sqrt(pow(b, 2) + pow(z, 2));
 	//Check for solutions
 	if(d != 0 && d < (FEMUR_LENGTH + TIBIA_LENGTH)){
 		//Circles intersect at one or two points
 		a = (pow(FEMUR_LENGTH, 2) - pow(TIBIA_LENGTH, 2) + pow(d, 2))/(2*d);
 		h = sqrt(pow(FEMUR_LENGTH, 2) - pow(a, 2));
 		//Calculate Femur->Tibia joint point coordinates
-		P3.X = (a*b - h*y)/d;
-		P3.Y = (a*y + h*b)/d;
+		P3.X = (a*b - h*z)/d;
+		P3.Y = (a*z + h*b)/d;
 		//Check Coxa Quarter and find Coxa Polar Angle in deg
 		//The Coxa can only move in Quarter I and IV, therefore X is always positive
-		A = atan2(z, x)*180/M_PI;
+		A = atan2(y, x)*180/M_PI;
 		//Check Femur Quarter and find Femur Polar Angle in deg
 		B = atan2(P3.Y, P3.X)*180/M_PI;
 		//Check Tibia Quarter and find Tibia Polar Angle in rad
-		C = atan2(y - P3.Y, b - P3.X)*180/M_PI;
+		C = atan2(z - P3.Y, b - P3.X)*180/M_PI;
 		//Convert angles into AX type
 		switch(LEG.SIDE){
 		case 0:
@@ -321,9 +312,18 @@ unsigned char AxCheckAngleLimits(void)
 void AxStartingPosition(void)
 {
 	AX_LEG_ANGLES ANGLES;
-	ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 - COXA_POLAR_ANGLE)*M_PI/180;
+	switch(LEG.SIDE){
+	case 0:
+		ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 - COXA_POLAR_ANGLE)*M_PI/180;
+		break;
+	case 1:
+		ANGLES.COXA = (AxTxIS(ax_servo_ids[LEG.ID][0], ax_read, ax_read_present_position)*0.29 + COXA_POLAR_ANGLE)*M_PI/180;
+		break;
+	default:
+		break;
+	}
 	ANGLES.FEMUR = (FEMUR_POLAR_ANGLE - AxTxIS(ax_servo_ids[LEG.ID][1], ax_read, ax_read_present_position)*0.29)*M_PI/180;
-	ANGLES.TIBIA = (AxTxIS(ax_servo_ids[LEG.ID][2], ax_read, ax_read_present_position)*0.29 + ANGLES.FEMUR - TIBIA_POLAR_ANGLE)*M_PI/180;
+	ANGLES.TIBIA = (AxTxIS(ax_servo_ids[LEG.ID][2], ax_read, ax_read_present_position)*0.29 + ANGLES.FEMUR*180/M_PI - TIBIA_POLAR_ANGLE)*M_PI/180;
 	LEG.STARTING_POSITION.X = FEMUR_LENGTH*cos(ANGLES.FEMUR) + TIBIA_LENGTH*cos(ANGLES.FEMUR + ANGLES.TIBIA);
 	LEG.STARTING_POSITION.Z = FEMUR_LENGTH*sin(ANGLES.FEMUR) + TIBIA_LENGTH*sin(ANGLES.FEMUR + ANGLES.TIBIA);
 	LEG.STARTING_POSITION.Y = (LEG.STARTING_POSITION.X + COXA_LENGTH)*tan(ANGLES.COXA);

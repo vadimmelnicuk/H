@@ -161,11 +161,11 @@ void LegWriteHome(unsigned char id)
 	EcanTxI(id, ecan_write);
 }
 
-void LegWriteYShift(unsigned char id, signed short int y)
+void LegWriteZShift(unsigned char id, signed short int z)
 {
 	ecan_tx_buffer[0] = 2;					//Y shift command
-	ecan_tx_buffer[1] = y & 0xFF;			//Y low byte
-	ecan_tx_buffer[2] = y >> 8;				//Y high byte
+	ecan_tx_buffer[1] = z & 0xFF;			//Y low byte
+	ecan_tx_buffer[2] = z >> 8;				//Y high byte
 	EcanTxI(id, ecan_write);
 }
 
@@ -222,6 +222,14 @@ void LegWriteStepBegin(unsigned char id, unsigned char dir)
 	EcanTxI(id, ecan_write);
 }
 
+void LegWriteLift(unsigned char id, signed short int z)
+{
+	ecan_tx_buffer[0] = 9;					//Lift command
+	ecan_tx_buffer[1] = z & 0xFF;			//Y low byte
+	ecan_tx_buffer[2] = z >> 8;				//Y high byte
+	EcanTxI(id, ecan_write);
+}
+
 unsigned char LegReadPing(unsigned char id)
 {
 	EcanTxI(id, ecan_ping);
@@ -257,8 +265,8 @@ void LegProcessInstruction(void)
 		case 1:								//Home command
 			AxLegMove(DEFAULT_HOME_POSITION_X, DEFAULT_HOME_POSITION_Y, DEFAULT_HOME_POSITION_Z);
 			break;
-		case 2:								//Y shift command
-			LEG.SHIFT.Y = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
+		case 2:								//Z shift command
+			LEG.SHIFT.Z = uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]));
 			break;
 		case 3:								//Speed command
 			LEG.SPEED = tcti(ecan_rx_buffer[2], ecan_rx_buffer[3]);
@@ -285,6 +293,9 @@ void LegProcessInstruction(void)
 			break;
 		case 8:								//Step begin command
 			AxLegStepBegin(ecan_rx_buffer[2]);
+			break;
+		case 9:								//Lift command
+			AxLegLift(uitsi(tcti(ecan_rx_buffer[2], ecan_rx_buffer[3])));
 			break;
 		default:
 			break;
@@ -320,47 +331,88 @@ unsigned char ConProcessStatusTO(unsigned char instruction, unsigned char status
 void ConProcessCommand(void)
 {
 	switch(con_state){
-		case 0:								//Initialisation
-			if(rx1_buffer[0] == 13){		//ENTER pressed?
-				LedsBlink();				//Blink LEDs
-				LedsBlink();				//Blink LEDs
-				LedsBlink();				//Blink LEDs
-				LegsReset();				//Reset legs
-				printf("Reset legs - \033[32;1mOK\033[0m\r\n");
-				printf("Pinging legs...\r\n");
-//				LegsPing();					//Ping legs
-//				LegsStatus();				//Flash leds for inactive legs
-				printf("Everything seems to be functional.\r\n");
-				printf("Moving legs to the home position...\r\n");
-				LegWriteHome(5);			//Send home command to a leg
-				LegWriteHome(4);			//Send home command to a leg
-				LegWriteHome(3);			//Send home command to a leg
-				LegWriteHome(2);			//Send home command to a leg
-				LegWriteHome(1);			//Send home command to a leg
-				LegWriteHome(0);			//Send home command to a leg
-				LegWriteSpeed(5, 120);		//Set leg's speed
-				LegWriteSpeed(4, 120);		//Set leg's speed
-				LegWriteSpeed(3, 120);		//Set leg's speed
-				LegWriteSpeed(2, 120);		//Set leg's speed
-				LegWriteSpeed(1, 120);		//Set leg's speed
-				LegWriteSpeed(0, 120);		//Set leg's speed
-				LegWriteYShift(5, -80);		//Send Y shift command to a leg
-				LegWriteYShift(4, -80);		//Send Y shift command to a leg
-				LegWriteYShift(3, -80);		//Send Y shift command to a leg
-				LegWriteYShift(2, -80);		//Send Y shift command to a leg
-				LegWriteYShift(1, -80);		//Send Y shift command to a leg
-				LegWriteYShift(0, -80);		//Send Y shift command to a leg
-				Delay(3000);				//Delay 3s
-				printf("Press \"ENTER\" to lift the body...\r\n\r\n");
-				con_state = 1;				//Move to the next state
+	case 0:									//Initialisation
+		if(rx1_buffer[0] == 13){			//ENTER pressed?
+			LegsReset();					//Reset legs
+			LedsBlink();					//Blink LEDs
+			LedsBlink();					//Blink LEDs
+			LedsBlink();					//Blink LEDs
+			printf("Reset legs - \033[32;1mOK\033[0m\r\n");
+			printf("Pinging legs...\r\n");
+			LegsPing();						//Ping legs
+			LegsStatus();					//Flash leds for inactive legs
+			printf("Everything seems to be functional.\r\n");
+			LegWriteSpeed(5, 120);			//Set leg's speed
+			LegWriteSpeed(4, 120);			//Set leg's speed
+			LegWriteSpeed(3, 120);			//Set leg's speed
+			LegWriteSpeed(2, 120);			//Set leg's speed
+			LegWriteSpeed(1, 120);			//Set leg's speed
+			LegWriteSpeed(0, 120);			//Set leg's speed
+			printf("Press \"ENTER\" to move legs to home position...\r\n\r\n");
+			con_state = 1;
+		}
+		break;
+	case 1:
+		printf("Moving legs to the home position...\r\n");
+		LegWriteHome(5);					//Send home command to a leg
+		LegWriteHome(4);					//Send home command to a leg
+		LegWriteHome(3);					//Send home command to a leg
+		LegWriteHome(2);					//Send home command to a leg
+		LegWriteHome(1);					//Send home command to a leg
+		LegWriteHome(0);					//Send home command to a leg
+		Delay(2000);						//Delay 3s
+		printf("Press \"ENTER\" to lift the body...\r\n\r\n");
+		con_state = 2;						//Move to the next state
+		break;
+	case 2:
+		if(rx1_buffer[0] == 13){			//ENTER pressed?
+			printf("Making legs ready for movement...\r\n");
+			LegWriteStepBegin(5, 1);		//Send step begin command to a leg
+			LegWriteStepBegin(4, 0);		//Send step begin command to a leg
+			LegWriteStepBegin(3, 1);		//Send step begin command to a leg
+			LegWriteStepBegin(2, 0);		//Send step begin command to a leg
+			LegWriteStepBegin(1, 1);		//Send step begin command to a leg
+			LegWriteStepBegin(0, 0);		//Send step begin command to a leg
+			Delay(2000);
+			printf("Lifting body...\r\n");
+			LegWriteLift(5, -80);
+			LegWriteLift(4, -80);
+			LegWriteLift(3, -80);
+			LegWriteLift(2, -80);
+			LegWriteLift(1, -80);
+			LegWriteLift(0, -80);
+			Delay(2000);
+			printf("Press \"w\" to step forward.\r\n\r\n");
+			con_state = 3;
+		}
+		break;
+	case 3:
+		if(rx1_buffer[0] == 119){			//"w" pressed?
+			TxClearLine();
+			printf("Moving forward...");
+			if(step_side){
+				LegWriteStep(4, 1);				//Make a leg to step
+				LegWriteStep(2, 1);				//Make a leg to step
+				LegWriteStep(0, 1);				//Make a leg to step
+				LegWriteStepTransit(5, 1);		//Make a leg to step
+				LegWriteStepTransit(3, 1);		//Make a leg to step
+				LegWriteStepTransit(1, 1);		//Make a leg to step
+				step_side = 0;
+			}else{
+				LegWriteStep(5, 1);				//Make a leg to step
+				LegWriteStep(3, 1);				//Make a leg to step
+				LegWriteStep(1, 1);				//Make a leg to step
+				LegWriteStepTransit(4, 1);		//Make a leg to step
+				LegWriteStepTransit(2, 1);		//Make a leg to step
+				LegWriteStepTransit(0, 1);		//Make a leg to step
+				step_side = 1;
 			}
-			break;
-		case 1:
-			if(rx1_buffer[0] == 13){		//ENTER
-				
-			}
-			break;
-		default:
-			break;
+			Delay(2000);
+			TxClearLine();
+			printf("\033[32;1mDone\033[0m");
+		}
+		break;
+	default:
+		break;
 	}
 }
